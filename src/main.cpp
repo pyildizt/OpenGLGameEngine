@@ -13,6 +13,7 @@ void processInput(GLFWwindow* window);
 std::string readShaderFile(const std::string& filepath);
 
 GLuint VAO, VBO, EBO;
+GLuint shaderProgram;
 
 int main()
 {
@@ -77,6 +78,9 @@ int main()
     return 0;
 }
 
+/// <summary>
+/// Create and bind VAO, VBO and EBO
+/// </summary>
 void initializeShapes()
 {
     GLuint colorVBO;
@@ -121,11 +125,19 @@ void initializeShapes()
 
     glBindBuffer(GL_ARRAY_BUFFER, colorVBO);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(1);    
 }
 
+/// <summary>
+/// Continuously draw elements on screen 
+/// </summary>
 void display()
 {
+    GLfloat timeValue = glfwGetTime();
+    GLfloat greenValue = (sin(timeValue) / 2.0f) + 0.5f;
+    GLuint vertexColorLocation = glGetUniformLocation(shaderProgram, "vertexColor");
+    glUniform3f(vertexColorLocation, 0.0f, greenValue, 0.0f);
+
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
@@ -170,7 +182,7 @@ void initializeShaders()
     }
 
     // Create shader program
-    GLuint shaderProgram = glCreateProgram();
+    shaderProgram = glCreateProgram();
     glAttachShader(shaderProgram, vertexShader);
     glAttachShader(shaderProgram, fragmentShader);
     glLinkProgram(shaderProgram);
