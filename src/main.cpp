@@ -5,15 +5,42 @@
 #include <sstream>
 #include <string>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 void display();
 void initializeShaders();
 void initializeShapes();
+void loadTextures();
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 std::string readShaderFile(const std::string& filepath);
 
-GLuint VAO, VBO, EBO;
+GLuint VAO, VBO, colorVBO, EBO, texture, textureVBO;
 GLuint shaderProgram;
+
+GLfloat vertices[] = {
+     0.5f,  0.5f, 0.0f,  // top right
+     0.5f, -0.5f, 0.0f,  // bottom right
+    -0.5f, -0.5f, 0.0f,  // bottom left
+    -0.5f,  0.5f, 0.0f   // top left 
+};
+GLuint indices[] = {  // note that we start from 0!
+    0, 1, 3,   // first triangle
+    1, 2, 3    // second triangle
+};
+GLfloat colors[] = {
+    1.0f, 0.0f, 0.0f,
+    0.5f, 0.0f, 0.5f,
+    0.0f, 1.0f, 0.0f,
+    0.0f, 0.0f, 1.0f
+};
+GLfloat texCoords[] = {
+    0.0f, 0.0f,  // lower-left corner  
+    1.0f, 0.0f,  // lower-right corner
+    1.0f, 1.0f,  // upper-right corner
+    0.0f, 1.0f   // upper-left corner
+};
 
 int main()
 {
@@ -83,30 +110,12 @@ int main()
 /// </summary>
 void initializeShapes()
 {
-    GLuint colorVBO;
-
-    GLfloat vertices[] = {
-     0.5f,  0.5f, 0.0f,  // top right
-     0.5f, -0.5f, 0.0f,  // bottom right
-    -0.5f, -0.5f, 0.0f,  // bottom left
-    -0.5f, 0.5f,0.0f   // top left 
-    };
-    GLuint indices[] = {  // note that we start from 0!
-    0, 1, 3,   // first triangle
-    1, 2, 3    // second triangle
-    };  
-    GLfloat colors[] = {
-        1.0f, 0.0f, 0.0f,
-        0.5f, 0.0f, 0.5f,
-        0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 1.0f
-    };
-
     // Create and bind VAO, VBO and EBO
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
     glGenBuffers(1, &colorVBO);
+    glGenBuffers(1, &textureVBO);
 
     glBindVertexArray(VAO);
 
@@ -115,6 +124,9 @@ void initializeShapes()
 
     glBindBuffer(GL_ARRAY_BUFFER, colorVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ARRAY_BUFFER, textureVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(texCoords), texCoords, GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
@@ -125,7 +137,41 @@ void initializeShapes()
 
     glBindBuffer(GL_ARRAY_BUFFER, colorVBO);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(1);    
+    glEnableVertexAttribArray(1);
+
+    loadTextures();
+    glBindBuffer(GL_ARRAY_BUFFER, textureVBO);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(2);
+}
+
+void loadTextures()
+{
+    // Create and bind texture
+    glGenTextures(1, &texture);
+
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    // Set texture wrapping/filtering options
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // Load texture image
+    GLint width, height, nrChannels;
+    unsigned char* imageData = stbi_load("assets/textures/wall.jpg", &width, &height, &nrChannels, 0);
+    if (!imageData)
+    {
+        std::cout << "ERROR::TEXTURE::LOADING TEXTURE FAILED\n" << std::endl;
+    }
+
+    // Generate texture from image data
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, imageData);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    stbi_image_free(imageData);
 }
 
 /// <summary>
@@ -138,6 +184,7 @@ void display()
     GLuint vertexColorLocation = glGetUniformLocation(shaderProgram, "vertexColor");
     glUniform3f(vertexColorLocation, 0.0f, greenValue, 0.0f);
 
+    glBindTexture(GL_TEXTURE_2D, texture);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }

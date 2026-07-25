@@ -37,8 +37,12 @@ find_package(glfw3 REQUIRED)
 # Executable
 # ============================================
 
+file(GLOB SRC_FILES CONFIGURE_DEPENDS
+    src/*.cpp
+)
+
 add_executable(OpenGLIntroProject
-    src/main.cpp
+    ${SRC_FILES}
     ${GLAD_ROOT}/src/glad.c
 )
 
@@ -48,6 +52,7 @@ add_executable(OpenGLIntroProject
 
 target_include_directories(OpenGLIntroProject PRIVATE
     include
+    external/stb
     ${GLAD_ROOT}/include
 )
 
@@ -84,4 +89,10 @@ add_custom_command(TARGET OpenGLIntroProject POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_SOURCE_DIR}/shaders
         $<TARGET_FILE_DIR:OpenGLIntroProject>/shaders
+)
+
+add_custom_command(TARGET OpenGLIntroProject POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/assets
+        $<TARGET_FILE_DIR:OpenGLIntroProject>/assets
 )
