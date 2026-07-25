@@ -2,18 +2,16 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
-
 #include "Shader.h"
+#include "Texture.h"
+#include <string>
 
 void display(const Shader &shader);
 void initializeShapes();
-void loadTextures();
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 
-GLuint VAO, VBO, colorVBO, EBO, texture, textureVBO;
+GLuint VAO, VBO, colorVBO, EBO, textureVBO;
 
 GLfloat vertices[] = {
      0.5f,  0.5f, 0.0f,  // top right
@@ -37,6 +35,7 @@ GLfloat texCoords[] = {
     1.0f, 1.0f,  // upper-right corner
     0.0f, 1.0f   // upper-left corner
 };
+std::string wallTextureFilename = "assets/textures/wall.jpg";
 
 int main()
 {
@@ -137,39 +136,10 @@ void initializeShapes()
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(1);
 
-    loadTextures();
+    Texture wallTexture(wallTextureFilename);
     glBindBuffer(GL_ARRAY_BUFFER, textureVBO);
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(2);
-}
-
-void loadTextures()
-{
-    // Create and bind texture
-    glGenTextures(1, &texture);
-
-    glBindTexture(GL_TEXTURE_2D, texture);
-
-    // Set texture wrapping/filtering options
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    // Load texture image
-    GLint width, height, nrChannels;
-    unsigned char* imageData = stbi_load("assets/textures/wall.jpg", &width, &height, &nrChannels, 0);
-    if (!imageData)
-    {
-        std::cout << "ERROR::TEXTURE::LOADING TEXTURE FAILED\n" << std::endl;
-    }
-
-    // Generate texture from image data
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, imageData);
-    glGenerateMipmap(GL_TEXTURE_2D);
-
-    stbi_image_free(imageData);
 }
 
 /// <summary>
@@ -179,10 +149,8 @@ void display(const Shader &shader)
 {
     GLfloat timeValue = glfwGetTime();
     GLfloat greenValue = (sin(timeValue) / 2.0f) + 0.5f;
-    GLuint vertexColorLocation = glGetUniformLocation(shader.GetShaderProgram(), "vertexColor");
-    glUniform3f(vertexColorLocation, 0.0f, greenValue, 0.0f);
+    shader.SetVec3(shader.GetUniformLocation("vertexColor"), glm::vec3(0.0f, greenValue, 0.0f));
 
-    glBindTexture(GL_TEXTURE_2D, texture);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }

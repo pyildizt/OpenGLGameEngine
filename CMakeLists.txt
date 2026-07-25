@@ -32,6 +32,7 @@ endif()
 
 find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
+find_package(glm REQUIRED)
 
 # ============================================
 # Executable
@@ -63,6 +64,7 @@ target_include_directories(OpenGLIntroProject PRIVATE
 target_link_libraries(OpenGLIntroProject PRIVATE
     OpenGL::GL
     glfw
+    glm::glm
 )
 
 # ============================================

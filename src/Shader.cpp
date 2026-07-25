@@ -59,12 +59,7 @@ Shader::Shader()
     glDeleteShader(fragmentShader);
 }
 
-void Shader::SetShaderProgram(GLuint newShaderProgram)
-{
-    shaderProgram = newShaderProgram;
-}
-
-GLuint Shader::GetShaderProgram() const
+GLuint Shader::ShaderProgram() const
 {
     return shaderProgram;
 }
@@ -90,4 +85,19 @@ std::string Shader::readShaderFile(const std::string& filepath)
     std::stringstream buffer;
     buffer << file.rdbuf();
     return buffer.str();
+}
+
+GLuint Shader::GetUniformLocation(const std::string& name) const
+{
+    return glGetUniformLocation(shaderProgram, name.c_str());
+}
+
+void Shader::SetVec3(const GLuint location, const glm::vec3 val) const
+{
+    glUniform3f(location, val.x, val.y, val.z);
+}
+
+void Shader::SetVec4(const GLuint location, const glm::vec4 val) const
+{
+    glUniform4f(location, val.x, val.y, val.z, val.w);
 }
