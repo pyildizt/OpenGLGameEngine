@@ -1,23 +1,19 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
-#include <fstream>
-#include <sstream>
-#include <string>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-void display();
-void initializeShaders();
+#include "Shader.h"
+
+void display(const Shader &shader);
 void initializeShapes();
 void loadTextures();
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
-std::string readShaderFile(const std::string& filepath);
 
 GLuint VAO, VBO, colorVBO, EBO, texture, textureVBO;
-GLuint shaderProgram;
 
 GLfloat vertices[] = {
      0.5f,  0.5f, 0.0f,  // top right
@@ -79,7 +75,9 @@ int main()
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     // Initialize shapes and shaders
-    initializeShaders();
+    Shader shader{};
+    shader.ActivateShaderProgram();
+
     initializeShapes();
 
     // Main render loop
@@ -92,7 +90,7 @@ int main()
         glClearColor(0.20f, 0.15f, 0.18f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        display();
+        display(shader);
 
         // Check and call events and swap the buffers
         glfwSwapBuffers(window);
@@ -177,77 +175,16 @@ void loadTextures()
 /// <summary>
 /// Continuously draw elements on screen 
 /// </summary>
-void display()
+void display(const Shader &shader)
 {
     GLfloat timeValue = glfwGetTime();
     GLfloat greenValue = (sin(timeValue) / 2.0f) + 0.5f;
-    GLuint vertexColorLocation = glGetUniformLocation(shaderProgram, "vertexColor");
+    GLuint vertexColorLocation = glGetUniformLocation(shader.GetShaderProgram(), "vertexColor");
     glUniform3f(vertexColorLocation, 0.0f, greenValue, 0.0f);
 
     glBindTexture(GL_TEXTURE_2D, texture);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-}
-
-/// <summary>
-/// Read GLSL files from shaders folder and  create and use shader program
-/// </summary>
-void initializeShaders()
-{
-    // Initialize vertex shader
-    std::string vertexCode = readShaderFile("shaders/vertex.glsl");
-    const char* vertexShaderSource = vertexCode.c_str();
-
-    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-    glCompileShader(vertexShader);
-
-    // Check vertex shader
-    int  success;
-    char infoLog[512];
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
-    }
-
-    // Initialize fragment shader
-    std::string fragmentCode = readShaderFile("shaders/fragment.glsl");
-    const char* fragmentShaderSource = fragmentCode.c_str();
-
-    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-    glCompileShader(fragmentShader);
-
-    // Check fragment shader
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
-    }
-
-    // Create shader program
-    shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-
-    // Check shader program
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-    if (!success)
-    {
-        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER_PROGRAM::COMPILATION_FAILED\n" << infoLog << std::endl;
-    }
-
-    // Delete shaders after linking
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
-
-    // Use program
-    glUseProgram(shaderProgram);
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
@@ -259,17 +196,4 @@ void processInput(GLFWwindow* window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
-}
-
-std::string readShaderFile(const std::string& filepath)
-{
-    std::ifstream file(filepath);
-    if (!file)
-    {
-        throw std::runtime_error("Failed to open shader: " + filepath);
-    }
-
-    std::stringstream buffer;
-    buffer << file.rdbuf();
-    return buffer.str();
 }
