@@ -3,6 +3,8 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 Shader::Shader()
 {
@@ -100,4 +102,9 @@ void Shader::SetVec3(const GLuint location, const glm::vec3 val) const
 void Shader::SetVec4(const GLuint location, const glm::vec4 val) const
 {
     glUniform4f(location, val.x, val.y, val.z, val.w);
+}
+
+void Shader::SetMat4(const GLuint location, const glm::mat4& val) const
+{
+    glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(val));
 }

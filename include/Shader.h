@@ -23,6 +23,7 @@ public:
 	GLuint GetUniformLocation(const std::string& name) const;
 	void SetVec3(const GLuint location, const glm::vec3 val) const;
 	void SetVec4(const GLuint location, const glm::vec4 val) const;
+	void SetMat4(const GLuint location, const glm::mat4& val) const;
 };
 
 #endif
