@@ -54,6 +54,7 @@ add_executable(OpenGLIntroProject
 target_include_directories(OpenGLIntroProject PRIVATE
     include
     external/stb
+    external/tinyobjloader
     ${GLAD_ROOT}/include
 )
 

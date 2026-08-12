@@ -5,84 +5,24 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <vector>
 
+#include "Object.h"
 #include "Shader.h"
-#include "Texture.h"
 
-void createMatrices(const Shader& shader);
-void display(const Shader& shader);
-void initializeShapes();
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void processInput(GLFWwindow* window);
+void CreateMatrices(const Shader& shader);
+void Display();
+void InitializeObjects();
+void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
+void ProcessInput(GLFWwindow* window);
 
-GLuint VAO, VBO;
-
-GLfloat vertices[] = {
-     0.5f,  0.5f, 0.0f,  // top right
-     0.5f, -0.5f, 0.0f,  // bottom right
-    -0.5f, -0.5f, 0.0f,  // bottom left
-    -0.5f,  0.5f, 0.0f   // top left 
-};
-GLfloat cubeVertices[] = {
-    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-     0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-
-    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-    -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
-};
-GLuint indices[] = {  // note that we start from 0!
-    0, 1, 3,   // first triangle
-    1, 2, 3    // second triangle
-};
-GLfloat colors[] = {
-    1.0f, 0.0f, 0.0f,
-    0.5f, 0.0f, 0.5f,
-    0.0f, 1.0f, 0.0f,
-    0.0f, 0.0f, 1.0f
-};
-GLfloat texCoords[] = {
-    0.0f, 0.0f,  // lower-left corner  
-    1.0f, 0.0f,  // lower-right corner
-    1.0f, 1.0f,  // upper-right corner
-    0.0f, 1.0f   // upper-left corner
-};
 std::string wallTextureFilename = "assets/textures/wall.jpg";
+std::string cubeObjFilename = "assets/models/cube.obj";
+std::string vertexShaderFilepath = "shaders/vertex.glsl";
+std::string fragmentShaderFilepath = "shaders/fragment_basic.glsl";
+
+std::vector<Model> models;
+std::vector<Object> objects;
 
 int main()
 {
@@ -118,26 +58,25 @@ int main()
     glViewport(0, 0, 800, 600);
 
     // Handle window resizing
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
 
-    // Initialize shapes and shaders
-    Shader shader{};
+    // Initialize objects and shaders
+    Shader shader{vertexShaderFilepath, fragmentShaderFilepath};
     shader.ActivateShaderProgram();
-
-    initializeShapes();
+    InitializeObjects();
 
     // Main render loop
     while (!glfwWindowShouldClose(window))
     {
         // Handle input
-        processInput(window);
+        ProcessInput(window);
 
         // Render
         glClearColor(0.20f, 0.15f, 0.18f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        createMatrices(shader);
-        display(shader);
+        CreateMatrices(shader);
+        Display();
 
         // Check and call events and swap the buffers
         glfwSwapBuffers(window);
@@ -151,25 +90,16 @@ int main()
 }
 
 /// <summary>
-/// Create and bind VAO, VBO and EBO
+/// Create models and objects
 /// </summary>
-void initializeShapes()
+void InitializeObjects()
 {
-    // Create and bind VAO, VBO and EBO
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
+    models.reserve(100);
 
-    glBindVertexArray(VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), cubeVertices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    Texture wallTexture(wallTextureFilename);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(2);
+    Model model{cubeObjFilename};
+    models.push_back(model);
+    Object object{models[0]};
+    objects.push_back(object);
 
     glEnable(GL_DEPTH_TEST);
 }
@@ -177,7 +107,7 @@ void initializeShapes()
 /// <summary>
 /// Create transformation, model, view, projection matrices and send them to the vertex shader
 /// </summary>
-void createMatrices(const Shader& shader)
+void CreateMatrices(const Shader& shader)
 {
     glm::mat4 transform = glm::mat4(1.0f);
     transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
@@ -200,18 +130,17 @@ void createMatrices(const Shader& shader)
 /// <summary>
 /// Continuously draw elements on screen 
 /// </summary>
-void display(const Shader& shader)
+void Display()
 {
-    glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
+    objects[0].DrawObject();
 }
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+void FramebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
 }
 
-void processInput(GLFWwindow* window)
+void ProcessInput(GLFWwindow* window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
