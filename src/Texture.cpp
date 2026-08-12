@@ -47,7 +47,7 @@ Texture::Texture(const std::string& textureFilename)
     stbi_image_free(imageData);
 }
 
-GLuint Texture::TextureID() const
+GLuint Texture::GetTextureID() const
 {
 	return textureID;
 }

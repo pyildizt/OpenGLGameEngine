@@ -11,14 +11,14 @@ private:
 	GLuint shaderProgram{};
 
 public:
-	Shader();
+	Shader(const std::string& vertexShaderFilepath, const std::string& fragmentShaderFilepath);
 
-	GLuint ShaderProgram() const;
+	GLuint GetShaderProgram() const;
 
 	void ActivateShaderProgram() const;
 	void DeleteShaderProgram() const;
 
-	std::string readShaderFile(const std::string& filepath);
+	std::string ReadShaderFile(const std::string& filepath);
 
 	GLuint GetUniformLocation(const std::string& name) const;
 	void SetVec3(const GLuint location, const glm::vec3 val) const;

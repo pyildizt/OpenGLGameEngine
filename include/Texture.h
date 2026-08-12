@@ -14,7 +14,7 @@ private:
 public:
 	Texture(const std::string& textureFilename);
 	
-	GLuint TextureID() const;
+	GLuint GetTextureID() const;
 
 	void BindTexture() const;
 	void UnbindTexture() const;

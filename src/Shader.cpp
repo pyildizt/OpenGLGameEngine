@@ -6,10 +6,10 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-Shader::Shader()
+Shader::Shader(const std::string& vertexShaderFilepath, const std::string& fragmentShaderFilepath)
 {
     // Initialize vertex shader
-    std::string vertexCode = readShaderFile("shaders/vertex.glsl");
+    std::string vertexCode = ReadShaderFile(vertexShaderFilepath);
     const char* vertexShaderSource = vertexCode.c_str();
 
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -27,7 +27,7 @@ Shader::Shader()
     }
 
     // Initialize fragment shader
-    std::string fragmentCode = readShaderFile("shaders/fragment.glsl");
+    std::string fragmentCode = ReadShaderFile(fragmentShaderFilepath);
     const char* fragmentShaderSource = fragmentCode.c_str();
 
     GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -61,7 +61,7 @@ Shader::Shader()
     glDeleteShader(fragmentShader);
 }
 
-GLuint Shader::ShaderProgram() const
+GLuint Shader::GetShaderProgram() const
 {
     return shaderProgram;
 }
@@ -76,7 +76,7 @@ void Shader::DeleteShaderProgram() const
     glDeleteProgram(shaderProgram);
 }
 
-std::string Shader::readShaderFile(const std::string& filepath)
+std::string Shader::ReadShaderFile(const std::string& filepath)
 {
     std::ifstream file(filepath);
     if (!file)
