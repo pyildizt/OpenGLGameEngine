@@ -94,6 +94,11 @@ GLuint Shader::GetUniformLocation(const std::string& name) const
     return glGetUniformLocation(shaderProgram, name.c_str());
 }
 
+void Shader::SetInt(const GLuint location, const int val) const
+{
+    glUniform1i(location, val);
+}
+
 void Shader::SetVec3(const GLuint location, const glm::vec3 val) const
 {
     glUniform3f(location, val.x, val.y, val.z);

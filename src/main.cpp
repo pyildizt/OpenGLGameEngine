@@ -12,16 +12,17 @@
 
 void CreateMatrices(const Shader& shader);
 void Display();
-void InitializeObjects();
+void InitializeObjects(const Shader& shader);
 void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
 void ProcessInput(GLFWwindow* window);
 
 std::string wallTextureFilename = "assets/textures/wall.jpg";
 std::string cubeObjFilename = "assets/models/cube.obj";
 std::string vertexShaderFilepath = "shaders/vertex.glsl";
-std::string fragmentShaderFilepath = "shaders/fragment_basic.glsl";
+std::string fragmentShaderFilepath = "shaders/fragment.glsl";
 
 std::vector<Model> models;
+std::vector<Texture> textures;
 std::vector<Object> objects;
 
 int main()
@@ -63,7 +64,7 @@ int main()
     // Initialize objects and shaders
     Shader shader{vertexShaderFilepath, fragmentShaderFilepath};
     shader.ActivateShaderProgram();
-    InitializeObjects();
+    InitializeObjects(shader);
 
     // Main render loop
     while (!glfwWindowShouldClose(window))
@@ -92,14 +93,24 @@ int main()
 /// <summary>
 /// Create models and objects
 /// </summary>
-void InitializeObjects()
+void InitializeObjects(const Shader& shader)
 {
     models.reserve(100);
+    textures.reserve(100);
+    objects.reserve(100);
 
-    Model model{cubeObjFilename};
-    models.push_back(model);
-    Object object{models[0]};
-    objects.push_back(object);
+    models.emplace_back(cubeObjFilename);
+    std::cout << "after model\n";
+
+    textures.emplace_back(wallTextureFilename);
+    std::cout << "after texture\n";
+
+    models[0].SetTexture(textures[0]);
+    shader.SetInt(shader.GetUniformLocation("myTexture"), 0);
+    std::cout << "after SetTexture\n";
+   
+    objects.emplace_back(models[0]);
+    std::cout << "after object\n";
 
     glEnable(GL_DEPTH_TEST);
 }

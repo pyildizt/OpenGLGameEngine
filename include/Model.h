@@ -7,15 +7,21 @@
 #include <GLFW/glfw3.h>
 #include <string>
 #include <vector>
+#include <glm/gtc/type_ptr.hpp>
+
+struct Vertex
+{
+    glm::vec3 position;
+    glm::vec3 normal;
+    glm::vec2 texcoord;
+};
 
 class Model
 {
 private:
-    GLuint VAO, posVBO, norVBO, texVBO, EBO;
+    GLuint VAO, VBO, EBO;
 
-    std::vector<float> vertices;
-    std::vector<float> normals;
-    std::vector<float> texcoords;
+    std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
 
     Texture* texture;
