@@ -22,7 +22,6 @@ private:
     GLuint VAO, VBO, EBO;
 
     std::vector<Vertex> vertices;
-    std::vector<unsigned int> indices;
 
     Texture* texture;
 

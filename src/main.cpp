@@ -7,23 +7,32 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <vector>
 
+#include "Camera.h"
 #include "Object.h"
+#include "Projection.h"
+#include "Renderer.h"
 #include "Shader.h"
 
-void CreateMatrices(const Shader& shader);
-void Display();
-void InitializeObjects(const Shader& shader);
+void Render(const Renderer& renderer);
+void InitializeOpenGLParameters();
+void InitializeObjects();
 void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
 void ProcessInput(GLFWwindow* window);
 
-std::string wallTextureFilename = "assets/textures/wall.jpg";
-std::string cubeObjFilename = "assets/models/cube.obj";
 std::string vertexShaderFilepath = "shaders/vertex.glsl";
 std::string fragmentShaderFilepath = "shaders/fragment.glsl";
+
+std::string wallTextureFilename = "assets/textures/wall.jpg";
+std::string catTextureFilename = "assets/textures/concrete_cat_statue_diff_1k.jpg";
+
+std::string cubeObjFilename = "assets/models/cube.obj";
+std::string catObjFilename = "assets/models/cat/concrete_cat_statue_1k.obj";
 
 std::vector<Model> models;
 std::vector<Texture> textures;
 std::vector<Object> objects;
+std::vector<Camera> cameras;
+Projection projection;
 
 int main()
 {
@@ -61,14 +70,28 @@ int main()
     // Handle window resizing
     glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
 
-    // Initialize objects and shaders
+    // =============== INITIALIZE MAIN RENDERER ===============
+    // Create and activate shader
     Shader shader{vertexShaderFilepath, fragmentShaderFilepath};
     shader.ActivateShaderProgram();
-    InitializeObjects(shader);
 
-    // Main render loop
+    // Create perspective projection
+    Projection projection{};
+
+    // Create main camera
+    cameras.reserve(10);
+    cameras.emplace_back();
+
+    // Create main renderer
+    Renderer renderer{shader, projection, cameras[0]};
+    // =========================================================
+
+    InitializeOpenGLParameters();
+    InitializeObjects();
+
     while (!glfwWindowShouldClose(window))
     {
+        // =============== MAIN RENDER LOOP ===============
         // Handle input
         ProcessInput(window);
 
@@ -76,8 +99,8 @@ int main()
         glClearColor(0.20f, 0.15f, 0.18f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        CreateMatrices(shader);
-        Display();
+        Render(renderer);
+        // ================================================
 
         // Check and call events and swap the buffers
         glfwSwapBuffers(window);
@@ -93,57 +116,44 @@ int main()
 /// <summary>
 /// Create models and objects
 /// </summary>
-void InitializeObjects(const Shader& shader)
+void InitializeObjects()
 {
-    models.reserve(100);
-    textures.reserve(100);
-    objects.reserve(100);
+    models.reserve(10);
+    textures.reserve(10);
+    objects.reserve(10);
 
+    // ==== OBJECT 0 ====
     models.emplace_back(cubeObjFilename);
-    std::cout << "after model\n";
-
     textures.emplace_back(wallTextureFilename);
-    std::cout << "after texture\n";
-
     models[0].SetTexture(textures[0]);
-    shader.SetInt(shader.GetUniformLocation("myTexture"), 0);
-    std::cout << "after SetTexture\n";
-   
     objects.emplace_back(models[0]);
-    std::cout << "after object\n";
 
-    glEnable(GL_DEPTH_TEST);
+    objects[0].GetTransform().SetTransformValues(glm::vec3{0.5f}, glm::vec3{-55.0f, 0.0f, 0.0f}, glm::vec3{0.0f});
+    // ==================
+
+    // ==== OBJECT 1 ====
+    // models.emplace_back(catObjFilename);
+    // textures.emplace_back(catTextureFilename);
+    // models[1].SetTexture(textures[1]);
+    // objects.emplace_back(models[1]);
+    // ==================
 }
 
 /// <summary>
-/// Create transformation, model, view, projection matrices and send them to the vertex shader
+/// Modify builtin OpenGL parameters before render loop
 /// </summary>
-void CreateMatrices(const Shader& shader)
+void InitializeOpenGLParameters()
 {
-    glm::mat4 transform = glm::mat4(1.0f);
-    transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
-    transform = glm::scale(transform, glm::vec3(0.5, 0.5, 0.5));  
-    shader.SetMat4(shader.GetUniformLocation("transform"), transform);
-
-    glm::mat4 model = glm::mat4(1.0f);
-    model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    shader.SetMat4(shader.GetUniformLocation("model"), model);
-
-    glm::mat4 view = glm::mat4(1.0f);
-    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f)); 
-    shader.SetMat4(shader.GetUniformLocation("view"), view);
-
-    glm::mat4 projection;
-    projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
-    shader.SetMat4(shader.GetUniformLocation("projection"), projection);
+    glEnable(GL_DEPTH_TEST);
 }
 
 /// <summary>
 /// Continuously draw elements on screen 
 /// </summary>
-void Display()
+void Render(const Renderer& renderer)
 {
-    objects[0].DrawObject();
+    objects[0].GetTransform().SetRotationZ((float)glfwGetTime());
+    renderer.DrawObject(objects[0]);
 }
 
 void FramebufferSizeCallback(GLFWwindow* window, int width, int height)

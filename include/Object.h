@@ -14,6 +14,7 @@ public:
     Object(Model& modelRef);
 
     Model& GetModel() const;
+    Transform& GetTransform();
 
     void DrawObject();
 };

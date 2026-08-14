@@ -14,6 +14,12 @@ Model& Object::GetModel() const
     return *model;
 }
 
+Transform& Object::GetTransform()
+{
+    return transform;
+}
+
+
 void Object::DrawObject()
 {
     model->DrawModel();
