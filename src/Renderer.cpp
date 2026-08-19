@@ -10,9 +10,9 @@ Renderer::Renderer(Shader& shaderRef, Projection& projectionRef, Camera& cameraR
     shader->SetMat4(shader->GetUniformLocation("view"), camera->GetViewMatrix());
 }
 
-void Renderer::SetShader(const Shader& newShader)
+void Renderer::SetShader(Shader& newShader)
 {
-    *shader = newShader;
+    shader = &newShader;
 }
 
 Shader& Renderer::GetShader() const
@@ -20,10 +20,9 @@ Shader& Renderer::GetShader() const
     return *shader;
 }
 
-void Renderer::SetProjection(const Projection& newProjection)
+void Renderer::SetProjection(Projection& newProjection)
 {
-    *projection = newProjection;
-    shader->SetMat4(shader->GetUniformLocation("projection"), projection->GetProjection());
+    projection = &newProjection;
 }
 
 Projection& Renderer::GetProjection() const
@@ -31,15 +30,20 @@ Projection& Renderer::GetProjection() const
     return *projection;
 }
 
-void Renderer::SetCamera(const Camera& newCamera)
+void Renderer::SetCamera(Camera& newCamera)
 {
-    *camera = newCamera;
-    shader->SetMat4(shader->GetUniformLocation("view"), camera->GetViewMatrix());
+    camera = &newCamera;
 }
 
 Camera& Renderer::GetCamera() const
 {
     return *camera;
+}
+
+void Renderer::BeginFrame()
+{
+    shader->SetMat4(shader->GetUniformLocation("projection"), projection->GetProjection());
+    shader->SetMat4(shader->GetUniformLocation("view"), camera->GetViewMatrix());    
 }
 
 void Renderer::DrawObject(Object& object) const

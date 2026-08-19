@@ -16,15 +16,16 @@ private:
 public:
     Renderer(Shader& shaderRef, Projection& projectionRef, Camera& cameraRef);
 
-    void SetShader(const Shader& newShader);
+    void SetShader(Shader& newShader);
     Shader& GetShader() const;
 
-    void SetProjection(const Projection& newProjection);
+    void SetProjection(Projection& newProjection);
     Projection& GetProjection() const;
 
-    void SetCamera(const Camera& newCamera);
+    void SetCamera(Camera& newCamera);
     Camera& GetCamera() const;
 
+    void BeginFrame();
     void DrawObject(Object& object) const;
 };
 

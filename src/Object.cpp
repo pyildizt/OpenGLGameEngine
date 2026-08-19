@@ -5,8 +5,19 @@
 
 Object::Object(Model& modelRef)
 {
+    isActive = true;
     model = &modelRef;
     transform = Transform{}; 
+}
+
+void Object::SetActive(bool newVal)
+{
+    isActive = newVal;
+}
+
+bool Object::IsActive() const
+{
+    return isActive;
 }
 
 Model& Object::GetModel() const

@@ -23,6 +23,7 @@ public:
 
     void RotateRelative(glm::vec3 amount);
     void SetRotation(glm::vec3 newVal);
+    glm::vec3 GetRotationVector() const;
 
     void Translate(glm::vec3 amount);
     void SetPosition(glm::vec3 newVal);

@@ -13,18 +13,22 @@
 #include "Renderer.h"
 #include "Shader.h"
 
-void Render(const Renderer& renderer);
+void Render(Renderer& renderer);
 void InitializeOpenGLParameters();
 void InitializeObjects();
+
+void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
-void ProcessInput(GLFWwindow* window);
+void ProcessInput(GLFWwindow* window, float deltaTime);
 
 std::string vertexShaderFilepath = "shaders/vertex.glsl";
 std::string fragmentShaderFilepath = "shaders/fragment.glsl";
 
+std::string rockTextureFilename = "assets/textures/rock.jpg";
 std::string wallTextureFilename = "assets/textures/wall.jpg";
 std::string catTextureFilename = "assets/textures/concrete_cat_statue_diff_1k.jpg";
 
+std::string planeObjFilename = "assets/models/plane.obj";
 std::string cubeObjFilename = "assets/models/cube.obj";
 std::string catObjFilename = "assets/models/cat/concrete_cat_statue_1k.obj";
 
@@ -32,7 +36,11 @@ std::vector<Model> models;
 std::vector<Texture> textures;
 std::vector<Object> objects;
 std::vector<Camera> cameras;
+Camera* currCamera;
 Projection projection;
+
+float deltaTime{0.0f};
+float lastFrame{0.0f};
 
 int main()
 {
@@ -67,7 +75,8 @@ int main()
     // Viewport
     glViewport(0, 0, 800, 600);
 
-    // Handle window resizing
+    // Set callbacks
+    glfwSetKeyCallback(window, KeyCallback);
     glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
 
     // =============== INITIALIZE MAIN RENDERER ===============
@@ -81,6 +90,7 @@ int main()
     // Create main camera
     cameras.reserve(10);
     cameras.emplace_back();
+    currCamera = &cameras[0];
 
     // Create main renderer
     Renderer renderer{shader, projection, cameras[0]};
@@ -91,9 +101,14 @@ int main()
 
     while (!glfwWindowShouldClose(window))
     {
+        // Calculate delta time
+        float currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
+
         // =============== MAIN RENDER LOOP ===============
         // Handle input
-        ProcessInput(window);
+        ProcessInput(window, deltaTime);
 
         // Render
         glClearColor(0.20f, 0.15f, 0.18f, 1.0f);
@@ -123,19 +138,31 @@ void InitializeObjects()
     objects.reserve(10);
 
     // ==== OBJECT 0 ====
-    models.emplace_back(cubeObjFilename);
-    textures.emplace_back(wallTextureFilename);
+    models.emplace_back(planeObjFilename);
+    textures.emplace_back(rockTextureFilename);
     models[0].SetTexture(textures[0]);
     objects.emplace_back(models[0]);
 
-    objects[0].GetTransform().SetTransformValues(glm::vec3{0.5f}, glm::vec3{-55.0f, 0.0f, 0.0f}, glm::vec3{0.0f});
+    objects[0].GetTransform().SetScale(glm::vec3{2.0f});
+    objects[0].GetTransform().SetPosition(glm::vec3{0.0f, -5.0f, -30.0f});
     // ==================
 
     // ==== OBJECT 1 ====
-    // models.emplace_back(catObjFilename);
-    // textures.emplace_back(catTextureFilename);
-    // models[1].SetTexture(textures[1]);
-    // objects.emplace_back(models[1]);
+    models.emplace_back(cubeObjFilename);
+    textures.emplace_back(wallTextureFilename);
+    models[1].SetTexture(textures[1]);
+    objects.emplace_back(models[1]);
+
+    objects[1].GetTransform().SetPosition(glm::vec3{6.0f, -4.5f, -20.0f});
+    // ==================
+
+    // ==== OBJECT 2 ====
+    models.emplace_back(catObjFilename);
+    textures.emplace_back(catTextureFilename);
+    models[2].SetTexture(textures[2]);
+    objects.emplace_back(models[2]);
+
+    objects[2].SetActive(false);
     // ==================
 }
 
@@ -150,10 +177,18 @@ void InitializeOpenGLParameters()
 /// <summary>
 /// Continuously draw elements on screen 
 /// </summary>
-void Render(const Renderer& renderer)
+void Render(Renderer& renderer)
 {
-    objects[0].GetTransform().SetRotationZ((float)glfwGetTime());
-    renderer.DrawObject(objects[0]);
+    renderer.BeginFrame();
+
+    objects[1].GetTransform().RotateRelativeY(100.0f * deltaTime);
+
+    for (Object& object : objects)
+    {
+        if (object.IsActive()) {
+            renderer.DrawObject(object);
+        }
+    }
 }
 
 void FramebufferSizeCallback(GLFWwindow* window, int width, int height)
@@ -161,8 +196,63 @@ void FramebufferSizeCallback(GLFWwindow* window, int width, int height)
     glViewport(0, 0, width, height);
 }
 
-void ProcessInput(GLFWwindow* window)
+/// <summary>
+/// Process user input relative to delta time
+/// </summary>
+void ProcessInput(GLFWwindow* window, float deltaTime)
 {
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+    // Camera movement with WASD + QE for rotation -> upgrade to mouse movement
+    float distanceAmount = 10.0f;
+    float rotationAmount = 15.0f;
+    float x, y, z;
+
+    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+    {
+        currCamera->RotateRelative(glm::vec3{0.0f, rotationAmount, 0.0f} * deltaTime);
+    }
+    else if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+    {
+        currCamera->RotateRelative(glm::vec3{0.0f, -rotationAmount, 0.0f} * deltaTime);
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+    {
+        y = currCamera->GetRotationVector().y;
+        x = -sin(glm::radians(y));
+        z = -cos(glm::radians(y));
+        currCamera->Translate(glm::vec3{x, 0.0f, z} * distanceAmount * deltaTime);
+    }
+    else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    {
+        y = currCamera->GetRotationVector().y;
+        x = sin(glm::radians(y));
+        z = cos(glm::radians(y));
+        currCamera->Translate(glm::vec3{x, 0.0f, z} * distanceAmount * deltaTime);
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+    {
+        y = currCamera->GetRotationVector().y;
+        x = -cos(glm::radians(y));
+        z = sin(glm::radians(y));
+        currCamera->Translate(glm::vec3{x, 0.0f, z} * distanceAmount * deltaTime);
+    }
+    else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+    {
+        y = currCamera->GetRotationVector().y;
+        x = cos(glm::radians(y));
+        z = -sin(glm::radians(y));
+        currCamera->Translate(glm::vec3{x, 0.0f, z} * distanceAmount * deltaTime);
+    }
+}
+
+void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    switch(key) 
+    {
+    case GLFW_KEY_ESCAPE: // quit
         glfwSetWindowShouldClose(window, true);
+        exit(EXIT_SUCCESS);
+        break;
+    }
 }
