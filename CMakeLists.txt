@@ -69,6 +69,17 @@ target_link_libraries(OpenGLIntroProject PRIVATE
 )
 
 # ============================================
+# Copy shaders folder into the build directory
+# ============================================
+
+add_custom_target(CopyShaders ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/shaders
+        $<TARGET_FILE_DIR:OpenGLIntroProject>/shaders
+)
+add_dependencies(OpenGLIntroProject CopyShaders)
+
+# ============================================
 # Compiler warnings
 # ============================================
 
@@ -85,14 +96,8 @@ else()
 endif()
 
 # ============================================
-# Copy shaders folder into the build directory
+# Copy assets folder into the build directory
 # ============================================
-
-add_custom_command(TARGET OpenGLIntroProject POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_SOURCE_DIR}/shaders
-        $<TARGET_FILE_DIR:OpenGLIntroProject>/shaders
-)
 
 add_custom_command(TARGET OpenGLIntroProject POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory

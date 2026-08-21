@@ -23,7 +23,7 @@ glm::mat4 Camera::GetViewMatrix() const
 
     // Do x, y, z rotations in order
     // Quaternions will be implemented later to fix rotation issues
-    //transform = glm::rotate(transform, glm::radians(-rotationVector.x), glm::vec3(1.0f, 0.0, 0.0));
+    transform = glm::rotate(transform, glm::radians(-rotationVector.x), glm::vec3(1.0f, 0.0, 0.0));
     transform = glm::rotate(transform, glm::radians(-rotationVector.y), glm::vec3(0.0f, 1.0, 0.0));
     //transform = glm::rotate(transform, glm::radians(-rotationVector.z), glm::vec3(0.0f, 0.0, 1.0));
 
@@ -35,6 +35,9 @@ glm::mat4 Camera::GetViewMatrix() const
 void Camera::RotateRelative(glm::vec3 amount)
 {
     rotationVector = rotationVector + amount;
+
+    // Clamp vertical rotation
+    rotationVector.x = glm::clamp(rotationVector.x, -89.0f, 89.0f);
 }
 
 void Camera::SetRotation(glm::vec3 newVal)
@@ -60,4 +63,55 @@ void Camera::Translate(glm::vec3 amount)
 void Camera::SetPosition(glm::vec3 newVal)
 {
     positionVector = newVal;
+}
+
+glm::vec3 Camera::GetPositionVector() const
+{
+    if (debugCamera)
+    {
+        std::cout << "Camera pos. (" << positionVector.x << ", " << positionVector.y << ", " << positionVector.z << ")" << std::endl;
+    }
+
+    return positionVector;
+}
+
+void Camera::CalculateCameraVectors()
+{
+    glm::vec4 forward{0.0f, 0.0f, -1.0f, 0.0f};
+    glm::vec4 right{1.0f, 0.0f, 0.0f, 0.0f};
+    glm::vec4 up{0.0f, 1.0f, 0.0f, 0.0f};
+
+    // Handle horizontal rotation first (this does not change upVector)
+    glm::mat4 horizontalTransform{1.0f};
+    horizontalTransform = glm::rotate(horizontalTransform, glm::radians(rotationVector.y), glm::vec3(0.0f, 1.0f, 0.0f));
+    
+    forward = horizontalTransform * forward;
+    right = horizontalTransform * right;
+
+    // Handle vertical rotation on local plane (rightVector is the normal of this plane)
+    glm::mat4 verticalTransform{1.0f};
+    verticalTransform = glm::rotate(verticalTransform, glm::radians(rotationVector.x), glm::vec3{right});
+
+    forward = verticalTransform * forward;
+    up = verticalTransform * up;
+
+    // Normalize vectors
+    forwardVector = glm::vec3{glm::normalize(forward)};
+    rightVector = glm::vec3{glm::normalize(right)};
+    upVector = glm::vec3{glm::normalize(up)};
+}
+
+glm::vec3 Camera::GetForwardVector() const
+{
+    return forwardVector;
+}
+
+glm::vec3 Camera::GetRightVector() const
+{
+    return rightVector;
+}
+
+glm::vec3 Camera::GetUpVector() const
+{
+    return upVector;
 }
