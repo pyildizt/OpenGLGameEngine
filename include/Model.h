@@ -29,11 +29,12 @@ public:
     Model(const std::string& modelFilename);
 
     void SetTexture(Texture& newTexture);
-    Texture* GetTexture();
+    const Texture* GetTexture() const;
 
     bool LoadModelFromObj(const std::string& modelFilename);
     void InitializeModel();
-    void DrawModel();
+
+    void DrawModel() const;
 };
 
 #endif

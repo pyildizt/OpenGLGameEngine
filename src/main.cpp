@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "Camera.h"
+#include "CameraFixedObject.h"
 #include "Object.h"
 #include "Projection.h"
 #include "Renderer.h"
@@ -39,6 +40,7 @@ std::string catObjFilename = "assets/models/cat/concrete_cat_statue_1k.obj";
 std::vector<Model> models;
 std::vector<Texture> textures;
 std::vector<Object> objects;
+std::vector<CameraFixedObject> cameraFixedObjects;
 std::vector<Camera> cameras;
 Camera* currCamera;
 Projection projection;
@@ -147,6 +149,7 @@ void InitializeObjects()
     models.reserve(10);
     textures.reserve(10);
     objects.reserve(10);
+    cameraFixedObjects.reserve(10);
 
     // ==== OBJECT 0 - GROUND ====
     models.emplace_back(planeObjFilename);
@@ -196,20 +199,14 @@ void InitializeObjects()
         glm::vec3{7.0f, -3.0f, -8.f});
     // ============================
 
-    // ==== OBJECT 3 - SPHERE =====
-    models.emplace_back(cubeObjFilename);
+    // == CAMERA FIXED OBJECT 0 - SPHERE ==
+    models.emplace_back(sphereObjFilename);
     textures.emplace_back(redTextureFilename);
     models[3].SetTexture(textures[3]);
-    objects.emplace_back(models[3]);
-    currObjectIndex++;
+    cameraFixedObjects.emplace_back(cameras[0], models[3]);
 
-    objects[currObjectIndex].GetTransform().SetTransformValues(
-        glm::vec3{0.0001f}, 
-        glm::vec3{0.0f, 30.f, 0.0f}, 
-        glm::vec3{-4.0f, 0.5f, 9.f});
-
-    objects[currObjectIndex].SetActive(false);
-    // ============================
+    cameraFixedObjects[0].GetTransform().SetScale(glm::vec3{0.5f});
+    // ====================================
 }
 
 /// <summary>
@@ -230,41 +227,20 @@ void Render(Renderer& renderer)
 {
     renderer.BeginFrame();
 
-    //objects[1].GetTransform().RotateRelativeY(100.0f * deltaTime);
-
     for (Object& object : objects)
     {
         if (object.IsActive())
         {
             renderer.DrawObject(object);
         }
-        else
+    }
+
+    for (CameraFixedObject& cameraFixedObject : cameraFixedObjects)
+    {
+        if (cameraFixedObject.IsActive())
         {
-            Camera& camera = renderer.GetCamera();
-            camera.CalculateCameraVectors();
-
-            glm::vec3 positionVector = renderer.GetCamera().GetPositionVector() + renderer.GetCamera().GetForwardVector() * 4.5f;
-
-            // Camera basis to object's basis
-            glm::mat4 model{1.0f};
-            model[0] = glm::vec4(camera.GetRightVector(),    0.0f);
-            model[1] = glm::vec4(camera.GetUpVector(),       0.0f);
-            model[2] = glm::vec4(-camera.GetForwardVector(), 0.0f);
-            model[3] = glm::vec4(positionVector, 1.0f);
-
-            tempGlobalPositionVector.x += 0.01f;
-            model = glm::translate(model, tempGlobalPositionVector);
-            //model = glm::translate(model, glm::vec3{2.0f, 1.0f, 0.0f});
-            
-            tempGlobalRotationYAmount += 1.0f;
-            model = glm::rotate(model, glm::radians(tempGlobalRotationYAmount), glm::vec3{1.0f, 1.0f, 0.0f});
-            //model = glm::rotate(model, glm::radians(45.f), glm::vec3{1.0f, 1.0f, 0.0f});
-            
-            model = glm::scale(model, glm::vec3{0.2f});
-
-            renderer.GetShader().SetMat4(renderer.GetShader().GetUniformLocation("model"), model);
-            object.DrawObject();
-        }
+            renderer.DrawCameraFixedObject(cameraFixedObject);  
+        }  
     }
 }
 

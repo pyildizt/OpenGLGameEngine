@@ -1,4 +1,5 @@
 #include "Renderer.h"
+#include "CameraFixedObject.h"
 
 Renderer::Renderer(Shader& shaderRef, Projection& projectionRef, Camera& cameraRef)
 {
@@ -50,4 +51,10 @@ void Renderer::DrawObject(Object& object) const
 {
     shader->SetMat4(shader->GetUniformLocation("model"), object.GetTransform().GetMatrix());
     object.DrawObject();
+}
+
+void Renderer::DrawCameraFixedObject(CameraFixedObject& cameraFixedObject) const
+{
+    shader->SetMat4(shader->GetUniformLocation("model"), cameraFixedObject.GetMatrix());
+    cameraFixedObject.DrawObject();
 }

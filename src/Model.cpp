@@ -19,7 +19,7 @@ void Model::SetTexture(Texture& newTexture)
     texture = &newTexture;
 }
 
-Texture* Model::GetTexture()
+const Texture* Model::GetTexture() const
 {
     return texture;
 }
@@ -92,7 +92,7 @@ void CheckOpenGLError(const char* location)
     }
 }
 
-void Model::DrawModel()
+void Model::DrawModel() const
 {
     glBindVertexArray(VAO);
 

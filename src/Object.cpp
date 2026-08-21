@@ -30,8 +30,7 @@ Transform& Object::GetTransform()
     return transform;
 }
 
-
-void Object::DrawObject()
+void Object::DrawObject() const
 {
     model->DrawModel();
 }

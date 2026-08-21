@@ -3,7 +3,7 @@
 #include <iostream>
 
 int Camera::cameraCount = 0;
-bool debugCamera{true};
+bool debugCamera{};
 
 Camera::Camera()
 {

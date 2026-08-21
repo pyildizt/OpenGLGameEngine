@@ -1,24 +1,29 @@
-#ifndef OBJECT_H
-#define OBJECT_H
+#ifndef CAMERA_FIXED_OBJECT_H
+#define CAMERA_FIXED_OBJECT_H
 
+#include "Camera.h"
 #include "Model.h"
 #include "Transform.h"
 
-class Object
+class CameraFixedObject
 {
 private:
     bool isActive{true};
+    Camera* camera;
     Model* model;
     Transform transform;
-
+    
 public:
-    Object(Model& modelRef);
+    CameraFixedObject(Camera& cameraRef, Model& modelRef);
 
     void SetActive(bool newVal);
     bool IsActive() const;
 
+    void SetCamera();
+    Camera& GetCamera() const;
     Model& GetModel() const;
     Transform& GetTransform();
+    glm::mat4 GetMatrix();
 
     void DrawObject() const;
 };

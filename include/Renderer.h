@@ -2,6 +2,7 @@
 #define RENDERER_H
 
 #include "Camera.h"
+#include "CameraFixedObject.h"
 #include "Object.h"
 #include "Projection.h"
 #include "Shader.h"
@@ -27,6 +28,7 @@ public:
 
     void BeginFrame();
     void DrawObject(Object& object) const;
+    void DrawCameraFixedObject(CameraFixedObject& cameraFixedObject) const;
 };
 
 #endif
