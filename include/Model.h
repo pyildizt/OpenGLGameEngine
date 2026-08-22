@@ -25,14 +25,14 @@ private:
 
     Texture* texture;
 
+    bool LoadModelFromObj(const std::string& modelFilename);
+    void InitializeModel();
+
 public:
     Model(const std::string& modelFilename);
 
     void SetTexture(Texture& newTexture);
     const Texture* GetTexture() const;
-
-    bool LoadModelFromObj(const std::string& modelFilename);
-    void InitializeModel();
 
     void DrawModel() const;
 };

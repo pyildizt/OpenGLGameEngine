@@ -3,6 +3,13 @@
 #include "Model.h"
 #include "Transform.h"
 
+CameraFixedObject::CameraFixedObject(Model& modelRef)
+{
+    isActive = true;
+    model = &modelRef;
+    transform = Transform{}; 
+}
+
 CameraFixedObject::CameraFixedObject(Camera& cameraRef, Model& modelRef)
 {
     isActive = true;
@@ -21,6 +28,16 @@ bool CameraFixedObject::IsActive() const
     return isActive;
 }
 
+void CameraFixedObject::SetCamera(Camera& cameraRef)
+{
+    camera = &cameraRef;
+}
+
+Camera& CameraFixedObject::GetCamera() const
+{
+    return *camera;
+}
+
 Model& CameraFixedObject::GetModel() const
 {
     return *model;
@@ -33,8 +50,6 @@ Transform& CameraFixedObject::GetTransform()
 
 glm::mat4 CameraFixedObject::GetMatrix()
 {
-    camera->CalculateCameraVectors();
-
     glm::mat4 lookAt{1.0f};
     lookAt[0] = glm::vec4(camera->GetRightVector(), 0.0f);
     lookAt[1] = glm::vec4(camera->GetUpVector(), 0.0f);

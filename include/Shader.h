@@ -10,6 +10,8 @@ class Shader
 private:
 	GLuint shaderProgram{};
 
+	std::string ReadShaderFile(const std::string& filepath);
+
 public:
 	Shader(const std::string& vertexShaderFilepath, const std::string& fragmentShaderFilepath);
 
@@ -17,8 +19,6 @@ public:
 
 	void ActivateShaderProgram() const;
 	void DeleteShaderProgram() const;
-
-	std::string ReadShaderFile(const std::string& filepath);
 
 	GLuint GetUniformLocation(const std::string& name) const;
 	void SetInt(const GLuint location, const int val) const;

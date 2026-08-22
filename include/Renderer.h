@@ -11,24 +11,23 @@ class Renderer
 {
 private:
     Shader* shader;
-    Projection* projection;
+    Projection projection;
     Camera* camera;
 
 public:
-    Renderer(Shader& shaderRef, Projection& projectionRef, Camera& cameraRef);
+    Renderer(Shader& shaderRef, Camera& cameraRef);
 
     void SetShader(Shader& newShader);
     Shader& GetShader() const;
 
-    void SetProjection(Projection& newProjection);
-    Projection& GetProjection() const;
+    Projection& GetProjection();
 
     void SetCamera(Camera& newCamera);
     Camera& GetCamera() const;
 
     void BeginFrame();
     void DrawObject(Object& object) const;
-    void DrawCameraFixedObject(CameraFixedObject& cameraFixedObject) const;
+    void DrawCameraFixedObject(CameraFixedObject& cameraFixedObject, Camera& cameraRef);
 };
 
 #endif

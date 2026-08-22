@@ -101,17 +101,20 @@ void Camera::CalculateCameraVectors()
     upVector = glm::vec3{glm::normalize(up)};
 }
 
-glm::vec3 Camera::GetForwardVector() const
+glm::vec3 Camera::GetForwardVector()
 {
+    CalculateCameraVectors();
     return forwardVector;
 }
 
-glm::vec3 Camera::GetRightVector() const
+glm::vec3 Camera::GetRightVector()
 {
+    CalculateCameraVectors();
     return rightVector;
 }
 
-glm::vec3 Camera::GetUpVector() const
+glm::vec3 Camera::GetUpVector()
 {
+    CalculateCameraVectors();
     return upVector;
 }

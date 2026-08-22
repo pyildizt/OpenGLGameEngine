@@ -81,17 +81,6 @@ void Model::InitializeModel()
     std::cout << "======================" << '\n';
 }
 
-void CheckOpenGLError(const char* location)
-{
-    GLenum error = glGetError();
-
-    if (error != GL_NO_ERROR)
-    {
-        std::cout << "OpenGL error at " << location
-                  << ": " << error << '\n';
-    }
-}
-
 void Model::DrawModel() const
 {
     glBindVertexArray(VAO);

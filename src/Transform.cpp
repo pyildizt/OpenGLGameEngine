@@ -34,64 +34,12 @@ void Transform::ScaleRelative(glm::vec3 amount)
     scaleVector = scaleVector * amount;
 }
 
-void Transform::SetScale(glm::vec3 newVal)
-{
-    scaleVector = newVal;
-}
-
 void Transform::RotateRelative(glm::vec3 amount)
 {
     rotationVector = rotationVector + amount;
 }
 
-void Transform::SetRotation(glm::vec3 newVal)
-{
-    rotationVector = newVal;
-}
-
-void Transform::RotateRelativeX(float amount)
-{
-    rotationVector.x += amount;
-}
-
-void Transform::SetRotationX(float newVal)
-{
-    rotationVector.x = newVal;
-}
-
-void Transform::RotateRelativeY(float amount)
-{
-    rotationVector.y += amount;
-}
-
-void Transform::SetRotationY(float newVal)
-{
-    rotationVector.y = newVal;
-}
-
-void Transform::RotateRelativeZ(float amount)
-{
-    rotationVector.z += amount;
-}
-
-void Transform::SetRotationZ(float newVal)
-{
-    rotationVector.z = newVal;
-}
-
 void Transform::Translate(glm::vec3 amount)
 {
     positionVector = positionVector + amount;
-}
-
-void Transform::SetPosition(glm::vec3 newVal)
-{
-    positionVector = newVal;
-}
-
-void Transform::SetTransformValues(glm::vec3 scaleVal, glm::vec3 rotationVal, glm::vec3 positionVal)
-{
-    SetScale(scaleVal);
-    SetRotation(rotationVal);
-    SetPosition(positionVal);
 }

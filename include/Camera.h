@@ -16,6 +16,8 @@ private:
     glm::vec3 rightVector{1.0f, 0.0f, 0.0f};
     glm::vec3 upVector{0.0f, 1.0f, 0.0f};
 
+    void CalculateCameraVectors();
+
 public:
     static int cameraCount;
 
@@ -33,10 +35,9 @@ public:
     void SetPosition(glm::vec3 newVal);
     glm::vec3 GetPositionVector() const;
 
-    void CalculateCameraVectors();
-    glm::vec3 GetForwardVector() const;
-    glm::vec3 GetRightVector() const;
-    glm::vec3 GetUpVector() const;
+    glm::vec3 GetForwardVector();
+    glm::vec3 GetRightVector();
+    glm::vec3 GetUpVector();
 };
 
 #endif

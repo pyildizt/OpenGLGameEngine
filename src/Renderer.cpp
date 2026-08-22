@@ -1,13 +1,15 @@
 #include "Renderer.h"
-#include "CameraFixedObject.h"
 
-Renderer::Renderer(Shader& shaderRef, Projection& projectionRef, Camera& cameraRef)
+#include "CameraFixedObject.h"
+#include "Projection.h"
+
+Renderer::Renderer(Shader& shaderRef, Camera& cameraRef)
+    : projection()
 {
     shader = &shaderRef;
-    projection = &projectionRef;
     camera = &cameraRef;
 
-    shader->SetMat4(shader->GetUniformLocation("projection"), projection->GetProjection());
+    shader->SetMat4(shader->GetUniformLocation("projection"), projection.GetProjection());
     shader->SetMat4(shader->GetUniformLocation("view"), camera->GetViewMatrix());
 }
 
@@ -21,14 +23,9 @@ Shader& Renderer::GetShader() const
     return *shader;
 }
 
-void Renderer::SetProjection(Projection& newProjection)
+Projection& Renderer::GetProjection()
 {
-    projection = &newProjection;
-}
-
-Projection& Renderer::GetProjection() const
-{
-    return *projection;
+    return projection;
 }
 
 void Renderer::SetCamera(Camera& newCamera)
@@ -43,7 +40,7 @@ Camera& Renderer::GetCamera() const
 
 void Renderer::BeginFrame()
 {
-    shader->SetMat4(shader->GetUniformLocation("projection"), projection->GetProjection());
+    shader->SetMat4(shader->GetUniformLocation("projection"), projection.GetProjection());
     shader->SetMat4(shader->GetUniformLocation("view"), camera->GetViewMatrix());    
 }
 
@@ -53,8 +50,9 @@ void Renderer::DrawObject(Object& object) const
     object.DrawObject();
 }
 
-void Renderer::DrawCameraFixedObject(CameraFixedObject& cameraFixedObject) const
+void Renderer::DrawCameraFixedObject(CameraFixedObject& cameraFixedObject, Camera& cameraRef)
 {
+    cameraFixedObject.SetCamera(cameraRef);
     shader->SetMat4(shader->GetUniformLocation("model"), cameraFixedObject.GetMatrix());
     cameraFixedObject.DrawObject();
 }

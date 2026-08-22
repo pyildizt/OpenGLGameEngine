@@ -14,24 +14,8 @@ struct Transform
     glm::mat4 GetMatrix() const;
 
     void ScaleRelative(glm::vec3 amount);
-    void SetScale(glm::vec3 newVal);
-
     void RotateRelative(glm::vec3 amount);
-    void SetRotation(glm::vec3 newVal);
-
-    void RotateRelativeX(float amount);
-    void SetRotationX(float newVal);
-
-    void RotateRelativeY(float amount);
-    void SetRotationY(float newVal);
-
-    void RotateRelativeZ(float amount);
-    void SetRotationZ(float newVal);
-
     void Translate(glm::vec3 amount);
-    void SetPosition(glm::vec3 newVal);
-
-    void SetTransformValues(glm::vec3 scaleVal, glm::vec3 rotationVal, glm::vec3 positionVal);
 };
 
 #endif

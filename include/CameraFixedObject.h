@@ -14,14 +14,17 @@ private:
     Transform transform;
     
 public:
+    CameraFixedObject(Model& modelRef);
     CameraFixedObject(Camera& cameraRef, Model& modelRef);
 
     void SetActive(bool newVal);
     bool IsActive() const;
 
-    void SetCamera();
+    void SetCamera(Camera& cameraRef);
     Camera& GetCamera() const;
+
     Model& GetModel() const;
+
     Transform& GetTransform();
     glm::mat4 GetMatrix();
 
