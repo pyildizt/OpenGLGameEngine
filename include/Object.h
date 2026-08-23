@@ -1,26 +1,25 @@
 #ifndef OBJECT_H
 #define OBJECT_H
 
-#include "Model.h"
-#include "Transform.h"
+#include "ICollidable.h"
+#include "RenderObject.h"
 
-class Object
+class Object : public RenderObject, public ICollidable
 {
 private:
-    bool isActive{true};
-    Model* model;
-    Transform transform;
+    int objectID;
+
+    Collider collider;
 
 public:
+    static int objectCount;
+
     Object(Model& modelRef);
 
-    void SetActive(bool newVal);
-    bool IsActive() const;
+    int GetObjectID() const;
 
-    Model& GetModel() const;
-    Transform& GetTransform();
-
-    void DrawObject() const;
+    void SetCollider(const Collider& newCollider);
+    Collider GetWorldCollider() const override;
 };
 
 #endif

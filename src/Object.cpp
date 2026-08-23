@@ -1,36 +1,33 @@
 #include "Object.h"
 
-#include "Model.h"
-#include "Transform.h"
+int Object::objectCount = 0;
 
 Object::Object(Model& modelRef)
+    : RenderObject(modelRef)
 {
-    isActive = true;
-    model = &modelRef;
-    transform = Transform{}; 
+    objectID = objectCount++;
 }
 
-void Object::SetActive(bool newVal)
+int Object::GetObjectID() const
 {
-    isActive = newVal;
+    return objectID;
 }
 
-bool Object::IsActive() const
+void Object::SetCollider(const Collider& newCollider)
 {
-    return isActive;
+    collider = newCollider;
 }
 
-Model& Object::GetModel() const
+/// <summary>
+/// Translate from collider's local bounds to world bounds
+/// </summary>
+Collider Object::GetWorldCollider() const
 {
-    return *model;
-}
+    Collider worldCollider = collider;
 
-Transform& Object::GetTransform()
-{
-    return transform;
-}
+    worldCollider.center += GetTransform().positionVector;
+    worldCollider.halfSize = collider.halfSize * GetTransform().scaleVector;
+    worldCollider.radius = collider.radius * GetTransform().scaleVector.y;
 
-void Object::DrawObject() const
-{
-    model->DrawModel();
+    return worldCollider;
 }

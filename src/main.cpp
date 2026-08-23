@@ -5,6 +5,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "CollisionSystem.h"
+#include "ICollidable.h"
 #include "InputManager.h"
 #include "PlayerController.h"
 #include "Renderer.h"
@@ -12,7 +14,6 @@
 #include "Scene.h"
 #include "Shader.h"
 
-void RenderScene(Renderer& renderer, Scene& scene);
 void InitializeOpenGLParameters();
 void InitializeScene(Scene& scene);
 
@@ -97,6 +98,9 @@ int main()
     PlayerController playerController{inputManager};
     currCamera = &playerController.GetPlayerCamera();
 
+    // Create collision system
+    CollisionSystem collisionSystem{};
+
     // Create resource manager and main scene
     ResourceManager resourceManager{};
     Scene mainScene{resourceManager};
@@ -120,11 +124,11 @@ int main()
         playerController.Update(deltaTime);
         inputManager.EndFrame();
 
-        // Render
-        glClearColor(0.20f, 0.15f, 0.18f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        // Check object collisions with player
+        collisionSystem.Update(playerController, mainScene);
 
-        RenderScene(renderer, mainScene);
+        // Render
+        renderer.RenderScene(mainScene);
         // ================================================
 
         // Check and call events and swap the buffers
@@ -159,26 +163,27 @@ void InitializeScene(Scene& scene)
      * [=]: capture all external variables by value
      * [a, &b]: capture 'a' by value and 'b' by reference
      */
-    auto AddWall = [&](float rotationVectorY, glm::vec3 positionVector) {
+    auto AddWall = [&](glm::vec3 scaleVector, glm::vec3 positionVector) {
         Object& wall = scene.AddObject(cubeObjFilename, wallTextureFilename);
-        wall.GetTransform().scaleVector = glm::vec3{20.0f, 8.0f, 0.5f};
-        wall.GetTransform().rotationVector.y = rotationVectorY;
+        wall.GetTransform().scaleVector = scaleVector;
         wall.GetTransform().positionVector = positionVector;
+        wall.SetCollider(Collider{ColliderShape::Box, 0.0f, glm::vec3{1.0f}, glm::vec3{0.0f}});
     };
-    AddWall(0.0f, glm::vec3{0.0f, 0.0f, -20.0f});
-    AddWall(90.0f, glm::vec3{-20.0f, 0.0f, 0.0f});
-    AddWall(90.0f, glm::vec3{20.0f, 0.0f, 0.0f});
-    AddWall(0.0f, glm::vec3{0.0f, 0.0f, 20.0f});
-
+    AddWall(glm::vec3{20.0f, 8.0f, 0.5f}, glm::vec3{0.0f, 0.0f, 20.0f});
+    AddWall(glm::vec3{20.0f, 8.0f, 0.5f}, glm::vec3{0.0f, 0.0f, -20.0f});
+    AddWall(glm::vec3{0.5f, 8.0f, 20.0f}, glm::vec3{-20.0f, 0.0f, 0.0f});
+    AddWall(glm::vec3{0.5f, 8.0f, 20.0f}, glm::vec3{20.0f, 0.0f, 0.0f});
+    
     // ==== OBJECT 2 - CAT ========
     Object& cat = scene.AddObject(catObjFilename, marbleTextureFilename);
     cat.GetTransform().scaleVector = glm::vec3{20.0f};
     cat.GetTransform().rotationVector.y = 30.0f;
     cat.GetTransform().positionVector = glm::vec3{7.0f, -3.0f, -8.f};
+    cat.SetCollider(Collider{ColliderShape::Box, 0.0f, glm::vec3{1.0f}});
 
     // == CAMERA FIXED OBJECT 0 - SPHERE ==
-    CameraFixedObject& sphere = scene.AddCameraFixedObject(sphereObjFilename, redTextureFilename);
-    sphere.GetTransform().scaleVector = glm::vec3{0.5f};
+    // CameraFixedObject& sphere = scene.AddCameraFixedObject(sphereObjFilename, redTextureFilename);
+    // sphere.GetTransform().scaleVector = glm::vec3{0.5f};
 }
 
 /// <summary>
@@ -187,30 +192,6 @@ void InitializeScene(Scene& scene)
 void InitializeOpenGLParameters()
 {
     glEnable(GL_DEPTH_TEST);
-}
-
-/// <summary>
-/// Continuously draw elements on screen 
-/// </summary>
-void RenderScene(Renderer& renderer, Scene& scene)
-{
-    renderer.BeginFrame();
-
-    for (Object& object : scene.GetObjects())
-    {
-        if (object.IsActive())
-        {
-            renderer.DrawObject(object);
-        }
-    }
-    for (CameraFixedObject& cameraFixedObject : scene.GetCameraFixedObjects())
-    {
-        if (cameraFixedObject.IsActive())
-        {
-            cameraFixedObject.GetTransform().Translate(glm::vec3{0.0f, 0.0f, -0.1f});
-            renderer.DrawCameraFixedObject(cameraFixedObject, renderer.GetCamera());  
-        }  
-    }
 }
 
 void CursorPosCallback(GLFWwindow* window, double xpos, double ypos)

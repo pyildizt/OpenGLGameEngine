@@ -1,16 +1,34 @@
 #include "PlayerController.h"
 
 #include "Camera.h"
+#include "ICollidable.h"
 
 PlayerController::PlayerController(InputManager& inputManagerRef)
     : inputManager(inputManagerRef), playerCamera()
 {
-
+    collider.colliderShape = ColliderShape::Box;
+    collider.halfSize = glm::vec3{0.5f, 1.0f, 0.5f};
 }
 
 Camera& PlayerController::GetPlayerCamera()
 {
     return playerCamera;
+}
+
+const Camera& PlayerController::GetPlayerCamera() const
+{
+    return playerCamera;
+}
+
+Collider PlayerController::GetWorldCollider() const
+{
+    Collider worldCollider = collider;
+
+    worldCollider.center += GetPlayerCamera().GetPositionVector();
+    worldCollider.halfSize = collider.halfSize;
+    worldCollider.radius = collider.radius;
+
+    return worldCollider;
 }
 
 void PlayerController::Update(float deltaTime)
