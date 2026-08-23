@@ -7,12 +7,16 @@
 class Texture
 {
 private:
+	const std::string& filename;
+
 	GLuint textureID;
 
 	void SetDefaultParameters() const;
 
 public:
 	Texture(const std::string& textureFilename);
+
+	const std::string& GetTextureFilename() const;
 	
 	GLuint GetTextureID() const;
 

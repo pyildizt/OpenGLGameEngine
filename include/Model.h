@@ -19,6 +19,8 @@ struct Vertex
 class Model
 {
 private:
+    const std::string& filename;
+
     GLuint VAO, VBO, EBO;
 
     std::vector<Vertex> vertices;
@@ -31,8 +33,10 @@ private:
 public:
     Model(const std::string& modelFilename);
 
+    const std::string& GetModelFilename() const;
+
     void SetTexture(Texture& newTexture);
-    const Texture* GetTexture() const;
+    const Texture& GetTexture() const;
 
     void DrawModel() const;
 };

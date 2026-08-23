@@ -6,6 +6,7 @@
 #include "tiny_obj_loader.h"
 
 Model::Model(const std::string& modelFilename)
+    : filename(modelFilename)
 {
     if(LoadModelFromObj(modelFilename))
     {
@@ -14,14 +15,19 @@ Model::Model(const std::string& modelFilename)
     texture = nullptr;
 }
 
+const std::string& Model::GetModelFilename() const
+{
+    return filename;
+}
+
 void Model::SetTexture(Texture& newTexture)
 {
     texture = &newTexture;
 }
 
-const Texture* Model::GetTexture() const
+const Texture& Model::GetTexture() const
 {
-    return texture;
+    return *texture;
 }
 
 bool Model::LoadModelFromObj(const std::string& modelFilename)

@@ -6,6 +6,7 @@
 #include "stb_image.h"
 
 Texture::Texture(const std::string& textureFilename)
+    : filename(textureFilename)
 {
     // Create and bind texture
     glGenTextures(1, &textureID);
@@ -45,6 +46,11 @@ Texture::Texture(const std::string& textureFilename)
 
     // Free image data
     stbi_image_free(imageData);
+}
+
+const std::string& Texture::GetTextureFilename() const
+{
+    return filename;
 }
 
 GLuint Texture::GetTextureID() const

@@ -4,20 +4,17 @@
 #include <string>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <vector>
 
-#include "Camera.h"
-#include "CameraFixedObject.h"
 #include "InputManager.h"
-#include "Object.h"
 #include "PlayerController.h"
 #include "Renderer.h"
+#include "ResourceManager.h"
+#include "Scene.h"
 #include "Shader.h"
 
-void Render(Renderer& renderer);
+void RenderScene(Renderer& renderer, Scene& scene);
 void InitializeOpenGLParameters();
-void InitializeObjects();
+void InitializeScene(Scene& scene);
 
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void CursorPosCallback(GLFWwindow* window, double xpos, double ypos);
@@ -38,11 +35,6 @@ std::string cubeObjFilename = "assets/models/cube.obj";
 std::string sphereObjFilename = "assets/models/sphere.obj";
 std::string catObjFilename = "assets/models/cat/concrete_cat_statue_1k.obj";
 
-std::vector<Model> models;
-std::vector<Texture> textures;
-std::vector<Object> objects;
-std::vector<CameraFixedObject> cameraFixedObjects;
-std::vector<Camera> cameras;
 Camera* currCamera;
 
 InputManager* globalInputManager;
@@ -105,12 +97,16 @@ int main()
     PlayerController playerController{inputManager};
     currCamera = &playerController.GetPlayerCamera();
 
+    // Create resource manager and main scene
+    ResourceManager resourceManager{};
+    Scene mainScene{resourceManager};
+
     // Create main renderer
     Renderer renderer{shader, playerController.GetPlayerCamera()};
     // =========================================================
 
     InitializeOpenGLParameters();
-    InitializeObjects();
+    InitializeScene(mainScene);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -128,7 +124,7 @@ int main()
         glClearColor(0.20f, 0.15f, 0.18f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        Render(renderer);
+        RenderScene(renderer, mainScene);
         // ================================================
 
         // Check and call events and swap the buffers
@@ -145,68 +141,44 @@ int main()
 /// <summary>
 /// Create models and objects
 /// </summary>
-void InitializeObjects()
+void InitializeScene(Scene& scene)
 {
-    int currObjectIndex = -1;
-    models.reserve(10);
-    textures.reserve(10);
-    objects.reserve(10);
-    cameraFixedObjects.reserve(10);
-
     // ==== OBJECT 0 - GROUND ====
-    models.emplace_back(planeObjFilename);
-    textures.emplace_back(rockTextureFilename);
-    models[0].SetTexture(textures[0]);
-    objects.emplace_back(models[0]);
-    currObjectIndex++;
-    
-    objects[currObjectIndex].GetTransform().scaleVector = glm::vec3{2.0f};
-    objects[currObjectIndex].GetTransform().positionVector = glm::vec3{0.0f, -5.0f, 0.0f};
-    // ===========================
+    Object& ground = scene.AddObject(planeObjFilename, rockTextureFilename);
+    ground.GetTransform().scaleVector = glm::vec3{2.0f};
+    ground.GetTransform().positionVector = glm::vec3{0.0f, -5.0f, 0.0f};
 
     // ==== OBJECT 1 - WALLS =====
-    models.emplace_back(cubeObjFilename);
-    textures.emplace_back(wallTextureFilename);
-    models[1].SetTexture(textures[1]);
 
-    for (int i=1; i<5; i++)
-    {
-        objects.emplace_back(models[1]);
-        objects[currObjectIndex + i].GetTransform().scaleVector = glm::vec3{20.0f, 8.0f, 0.5f};   
-    }
-    objects[currObjectIndex + 1].GetTransform().positionVector = glm::vec3{0.0f, 0.0f, -20.0f};    
-
-    objects[currObjectIndex + 2].GetTransform().rotationVector.y = 90.0f;
-    objects[currObjectIndex + 2].GetTransform().positionVector = glm::vec3{-20.0f, 0.0f, 0.0f};    
-
-    objects[currObjectIndex + 3].GetTransform().rotationVector.y = 90.0f;
-    objects[currObjectIndex + 3].GetTransform().positionVector = glm::vec3{20.0f, 0.0f, 0.0f};  
-
-    objects[currObjectIndex + 4].GetTransform().positionVector = glm::vec3{0.0f, 0.0f, 20.0f}; 
-
-    currObjectIndex += 4;
-    // ============================
+    /* Lambda expressions in C++: 
+     * [capture_clause](parameter_list) -> return_type{body};
+     * [&](int a) -> int{return a+1;};
+     * return type does not always have to be specified explicitly: [&](int a) {return a+1;};
+     * []:  cannot access variables from the enclosing scope, only global/static variables
+     * [&]: capture all external variables by reference
+     * [=]: capture all external variables by value
+     * [a, &b]: capture 'a' by value and 'b' by reference
+     */
+    auto AddWall = [&](float rotationVectorY, glm::vec3 positionVector) {
+        Object& wall = scene.AddObject(cubeObjFilename, wallTextureFilename);
+        wall.GetTransform().scaleVector = glm::vec3{20.0f, 8.0f, 0.5f};
+        wall.GetTransform().rotationVector.y = rotationVectorY;
+        wall.GetTransform().positionVector = positionVector;
+    };
+    AddWall(0.0f, glm::vec3{0.0f, 0.0f, -20.0f});
+    AddWall(90.0f, glm::vec3{-20.0f, 0.0f, 0.0f});
+    AddWall(90.0f, glm::vec3{20.0f, 0.0f, 0.0f});
+    AddWall(0.0f, glm::vec3{0.0f, 0.0f, 20.0f});
 
     // ==== OBJECT 2 - CAT ========
-    models.emplace_back(catObjFilename);
-    textures.emplace_back(marbleTextureFilename);
-    models[2].SetTexture(textures[2]);
-    objects.emplace_back(models[2]);
-    currObjectIndex++;
-
-    objects[currObjectIndex].GetTransform().scaleVector = glm::vec3{20.0f};
-    objects[currObjectIndex].GetTransform().rotationVector.y = 30.0f;
-    objects[currObjectIndex].GetTransform().positionVector = glm::vec3{7.0f, -3.0f, -8.f};
-    // ============================
+    Object& cat = scene.AddObject(catObjFilename, marbleTextureFilename);
+    cat.GetTransform().scaleVector = glm::vec3{20.0f};
+    cat.GetTransform().rotationVector.y = 30.0f;
+    cat.GetTransform().positionVector = glm::vec3{7.0f, -3.0f, -8.f};
 
     // == CAMERA FIXED OBJECT 0 - SPHERE ==
-    models.emplace_back(sphereObjFilename);
-    textures.emplace_back(redTextureFilename);
-    models[3].SetTexture(textures[3]);
-    cameraFixedObjects.emplace_back(models[3]);
-
-    cameraFixedObjects[0].GetTransform().scaleVector = glm::vec3{0.5f};
-    // ====================================
+    CameraFixedObject& sphere = scene.AddCameraFixedObject(sphereObjFilename, redTextureFilename);
+    sphere.GetTransform().scaleVector = glm::vec3{0.5f};
 }
 
 /// <summary>
@@ -220,24 +192,22 @@ void InitializeOpenGLParameters()
 /// <summary>
 /// Continuously draw elements on screen 
 /// </summary>
-void Render(Renderer& renderer)
+void RenderScene(Renderer& renderer, Scene& scene)
 {
     renderer.BeginFrame();
 
-    for (Object& object : objects)
+    for (Object& object : scene.GetObjects())
     {
         if (object.IsActive())
         {
             renderer.DrawObject(object);
         }
     }
-
-    cameraFixedObjects[0].GetTransform().Translate(glm::vec3{0.0f, 0.0f, -0.1f});
-
-    for (CameraFixedObject& cameraFixedObject : cameraFixedObjects)
+    for (CameraFixedObject& cameraFixedObject : scene.GetCameraFixedObjects())
     {
         if (cameraFixedObject.IsActive())
         {
+            cameraFixedObject.GetTransform().Translate(glm::vec3{0.0f, 0.0f, -0.1f});
             renderer.DrawCameraFixedObject(cameraFixedObject, renderer.GetCamera());  
         }  
     }
