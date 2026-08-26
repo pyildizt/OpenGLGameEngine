@@ -20,6 +20,12 @@ Texture& ResourceManager::GetOrLoadTexture(const std::string& textureFilename)
     return pair.first->second; 
 }
 
+Shader& ResourceManager::GetOrLoadShader(const std::string& shaderName, const std::string& vertexShaderFilepath, const std::string& fragmentShaderFilepath)
+{
+    auto pair = shaders.try_emplace(shaderName, vertexShaderFilepath, fragmentShaderFilepath);
+    return pair.first->second; 
+}
+
 /*
 Model& ResourceManager::TryAddModel(const std::string& modelFilename)
 {

@@ -16,9 +16,13 @@ private:
     Camera* camera;
 
     bool showColliders{};
+    GLuint boxColliderVAO, boxColliderVBO, boxColliderEBO;
 
 public:
+    Renderer();
     Renderer(Shader& shaderRef, Camera& cameraRef);
+
+    void InitializeRenderer(Shader& shaderRef, Camera& cameraRef);
 
     void SetShader(Shader& newShader);
     Shader& GetShader() const;
@@ -30,12 +34,13 @@ public:
 
     void SetShowColliders(bool newVal);
     bool ShowColliders() const;
+    void InitializeColliders();
+    void DrawCollider(const ICollidable& collidable);
+    void DrawColliders(Scene& scene);
 
     void BeginFrame();
     void DrawObject(const Object& object);
     void DrawCameraFixedObject(CameraFixedObject& cameraFixedObject, Camera& cameraRef);
-
-    void DrawCollider(const Collider& collider) const;
 
     void RenderScene(Scene& scene);
 };

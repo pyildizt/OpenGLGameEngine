@@ -12,6 +12,8 @@ private:
     Camera playerCamera;
     Collider collider;
 
+    bool isActive{true};
+
     float distanceAmount{10.0f};
     float mouseSensitivity{0.5f};
 
@@ -20,6 +22,9 @@ private:
 
 public:
     PlayerController(InputManager& inputManager);
+
+    void SetActive(bool newVal);
+    bool IsActive() const;
 
     Camera& GetPlayerCamera();
     const Camera& GetPlayerCamera() const;

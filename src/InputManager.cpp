@@ -1,8 +1,11 @@
 #include "InputManager.h"
 
-InputManager::InputManager(GLFWwindow* windowPtr)
+InputManager::InputManager(GLFWwindow* window)
+    : window(window)
 {
-    window = windowPtr;
+    glfwSetWindowUserPointer(window, this);
+
+    glfwSetCursorPosCallback(window, CursorPosCallbackWrapper);
 }
 
 void InputManager::EndFrame()
@@ -15,13 +18,28 @@ bool InputManager::IsKeyPressed(int key) const
     return (glfwGetKey(window, key) == GLFW_PRESS);
 }
 
-void InputManager::SetCursorDeltaPos(float deltaXpos, float deltaYpos)
-{
-    cursorDeltaPos.x += deltaXpos;
-    cursorDeltaPos.y += deltaYpos;
-}
-
 glm::vec2 InputManager::GetCursorDeltaPos()
 {
     return cursorDeltaPos;
+}
+
+void InputManager::CursorPosCallbackWrapper(GLFWwindow* window, double xpos, double ypos)
+{
+    // Needed because apparently GLFW does not accept non-static function
+    auto* inputManager = static_cast<InputManager*>(glfwGetWindowUserPointer(window));
+    inputManager->CursorPosCallback(window, xpos, ypos);
+}
+
+void InputManager::CursorPosCallback(GLFWwindow* window, double xpos, double ypos)
+{
+    // Calculate current xpos and ypos difference from previous frame
+    double deltaXpos = xpos - cursorPrevPos.x;
+    double deltaYpos = ypos - cursorPrevPos.y;
+
+    cursorDeltaPos.x += deltaXpos;
+    cursorDeltaPos.y += deltaYpos;
+
+    // Update prev xpos and ypos
+    cursorPrevPos.x = xpos;
+    cursorPrevPos.y = ypos;
 }

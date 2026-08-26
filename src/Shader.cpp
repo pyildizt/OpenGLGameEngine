@@ -59,6 +59,8 @@ Shader::Shader(const std::string& vertexShaderFilepath, const std::string& fragm
     // Delete shaders after linking
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
+
+    ActivateShaderProgram();
 }
 
 GLuint Shader::GetShaderProgram() const
@@ -92,6 +94,11 @@ std::string Shader::ReadShaderFile(const std::string& filepath)
 GLuint Shader::GetUniformLocation(const std::string& name) const
 {
     return glGetUniformLocation(shaderProgram, name.c_str());
+}
+
+void Shader::SetBool(const GLuint location, const bool val) const
+{
+    glUniform1i(location, val ? 1 : 0);
 }
 
 void Shader::SetInt(const GLuint location, const int val) const

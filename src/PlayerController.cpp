@@ -1,13 +1,20 @@
 #include "PlayerController.h"
 
-#include "Camera.h"
-#include "ICollidable.h"
-
 PlayerController::PlayerController(InputManager& inputManagerRef)
     : inputManager(inputManagerRef), playerCamera()
 {
     collider.colliderShape = ColliderShape::Box;
-    collider.halfSize = glm::vec3{0.5f, 1.0f, 0.5f};
+    collider.halfSize = glm::vec3{0.5f, 0.9f, 0.5f};
+}
+
+void PlayerController::SetActive(bool newVal)
+{
+    isActive = newVal;
+}
+
+bool PlayerController::IsActive() const
+{
+    return isActive;
 }
 
 Camera& PlayerController::GetPlayerCamera()
@@ -33,8 +40,11 @@ Collider PlayerController::GetWorldCollider() const
 
 void PlayerController::Update(float deltaTime)
 {
-    HandleMovement(deltaTime);
-    HandleRotation();
+    if (isActive)
+    {
+        HandleMovement(deltaTime);
+        HandleRotation();
+    }
 }
 
 /// <summary>

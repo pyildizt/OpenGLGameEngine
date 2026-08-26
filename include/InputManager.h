@@ -9,16 +9,19 @@ class InputManager
 private:
     GLFWwindow* window;
 
+    glm::vec2 cursorPrevPos{1080.0f/2, 720.0f/2};
     glm::vec2 cursorDeltaPos{};
 
+    static void CursorPosCallbackWrapper(GLFWwindow* window, double xpos, double ypos);
+    void CursorPosCallback(GLFWwindow* windowPtr, double xpos, double ypos);
+
 public:
-    InputManager(GLFWwindow* windowPtr);
+    InputManager(GLFWwindow* window);
 
     void EndFrame();
 
     bool IsKeyPressed(int key) const;
 
-    void SetCursorDeltaPos(float deltaXpos, float deltaYpos);
     glm::vec2 GetCursorDeltaPos();
 };
 

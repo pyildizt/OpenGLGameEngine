@@ -21,6 +21,7 @@ public:
 	void DeleteShaderProgram() const;
 
 	GLuint GetUniformLocation(const std::string& name) const;
+	void SetBool(const GLuint location, const bool val) const;
 	void SetInt(const GLuint location, const int val) const;
 	void SetVec3(const GLuint location, const glm::vec3 val) const;
 	void SetVec4(const GLuint location, const glm::vec4 val) const;
