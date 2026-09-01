@@ -4,7 +4,9 @@ PlayerController::PlayerController(InputManager& inputManagerRef)
     : inputManager(inputManagerRef), playerCamera()
 {
     collider.colliderShape = ColliderShape::Box;
-    collider.halfSize = glm::vec3{0.5f, 0.9f, 0.5f};
+    collider.halfSize = glm::vec3{0.49f, 0.99f, 0.49f};
+
+    playerCamera.GetLocalTransform().positionVector = glm::vec3{0.0f, 1.0f, 0.0f};
 }
 
 void PlayerController::SetActive(bool newVal)
@@ -31,7 +33,7 @@ Collider PlayerController::GetWorldCollider() const
 {
     Collider worldCollider = collider;
 
-    worldCollider.center += GetPlayerCamera().GetPositionVector();
+    worldCollider.center += GetPlayerCamera().GetLocalTransform().positionVector;
     worldCollider.halfSize = collider.halfSize;
     worldCollider.radius = collider.radius;
 
@@ -57,7 +59,7 @@ void PlayerController::HandleMovement(float deltaTime)
         glm::vec3 forwardVector = playerCamera.GetForwardVector();
         forwardVector.y = 0;
         forwardVector = glm::normalize(forwardVector);
-        playerCamera.Translate(forwardVector * distanceAmount * deltaTime);
+        playerCamera.GetLocalTransform().Translate(forwardVector * distanceAmount * deltaTime);
 
         // float y = playerCamera.GetRotationVector().y;
         // float x = -sin(glm::radians(y)); float z = -cos(glm::radians(y));
@@ -68,12 +70,12 @@ void PlayerController::HandleMovement(float deltaTime)
         glm::vec3 forwardVector = playerCamera.GetForwardVector();
         forwardVector.y = 0;
         forwardVector = glm::normalize(forwardVector);
-        playerCamera.Translate(-forwardVector * distanceAmount * deltaTime);
+        playerCamera.GetLocalTransform().Translate(-forwardVector * distanceAmount * deltaTime);
     }
 
     if (inputManager.IsKeyPressed(GLFW_KEY_D))
     {
-        playerCamera.Translate(playerCamera.GetRightVector() * distanceAmount * deltaTime);
+        playerCamera.GetLocalTransform().Translate(playerCamera.GetRightVector() * distanceAmount * deltaTime);
 
         // float y = playerCamera.GetRotationVector().y;
         // float x = cos(glm::radians(y)); float z = -sin(glm::radians(y));
@@ -81,7 +83,7 @@ void PlayerController::HandleMovement(float deltaTime)
     }
     else if (inputManager.IsKeyPressed(GLFW_KEY_A))
     {
-        playerCamera.Translate(-playerCamera.GetRightVector() * distanceAmount * deltaTime);
+        playerCamera.GetLocalTransform().Translate(-playerCamera.GetRightVector() * distanceAmount * deltaTime);
     }
 }
 

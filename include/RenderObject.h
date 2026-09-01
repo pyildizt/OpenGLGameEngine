@@ -2,26 +2,19 @@
 #define RENDER_OBJECT_H
 
 #include "Model.h"
-#include "Transform.h"
+#include "SceneNode.h"
 
-class RenderObject
+class RenderObject : public SceneNode
 {
 private:
-    bool isActive{true};
     Model& model;
-    Transform transform;
     glm::vec4 color{1.0f};
     bool useTexture{true};
 
 public:
     RenderObject(Model& modelRef);
 
-    void SetActive(bool newVal);
-    bool IsActive() const;
-
     Model& GetModel() const;
-    Transform& GetTransform();
-    const Transform& GetTransform() const;
 
     void SetColor(glm::vec4 newColor);
     glm::vec4 GetColor() const;

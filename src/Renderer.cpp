@@ -3,6 +3,8 @@
 #include "CameraFixedObject.h"
 #include "ICollidable.h"
 #include "Projection.h"
+#include "RenderObject.h"
+#include "SceneNode.h"
 #include "Utils.h"
 
 Renderer::Renderer()
@@ -78,12 +80,12 @@ void Renderer::BeginFrame()
     shader->SetMat4(shader->GetUniformLocation("view"), camera->GetViewMatrix());    
 }
 
-void Renderer::DrawObject(const Object& object)
+void Renderer::DrawRenderObject(const RenderObject& renderObject)
 {
-    shader->SetMat4(shader->GetUniformLocation("model"), object.GetTransform().GetMatrix());
-    shader->SetBool(shader->GetUniformLocation("useTexture"), object.IsUsingTexture());
-    shader->SetVec4(shader->GetUniformLocation("objectColor"), object.GetColor());
-    object.DrawObject();
+    shader->SetMat4(shader->GetUniformLocation("model"), renderObject.GetWorldMatrix());
+    shader->SetBool(shader->GetUniformLocation("useTexture"), renderObject.IsUsingTexture());
+    shader->SetVec4(shader->GetUniformLocation("objectColor"), renderObject.GetColor());
+    renderObject.DrawObject();
 }
 
 void Renderer::DrawCameraFixedObject(CameraFixedObject& cameraFixedObject, Camera& cameraRef)
@@ -181,13 +183,33 @@ void Renderer::DrawColliders(Scene& scene)
 {
     if (showColliders)
     {
-        for (const Object& object : scene.GetObjects())
+        for (const GameObject* gameObject : scene.GetGameObjects())
         {
-            if (object.IsActive())
+            if (gameObject->IsActive())
             {
-                DrawCollider(object);
+                DrawCollider(*gameObject);
             }
         }
+    }
+}
+
+void Renderer::RenderNode(const SceneNode& sceneNode)
+{
+    if (!sceneNode.IsActive())
+    {
+        return;
+    }
+
+    // Only render the RenderObject subclass of SceneNodes
+    if (const RenderObject* renderObject = dynamic_cast<const RenderObject*>(&sceneNode))
+    {
+        DrawRenderObject(*renderObject);
+    }
+
+    // Render children nodes recursively
+    for (const SceneNode* child : sceneNode.GetChildren())
+    {
+        RenderNode(*child);
     }
 }
 
@@ -195,21 +217,18 @@ void Renderer::RenderScene(Scene& scene)
 {
     BeginFrame();
 
-    for (const Object& object : scene.GetObjects())
+    for (const auto& node : scene.GetSceneNodes())
     {
-        if (object.IsActive())
-        {
-            DrawObject(object);
-        }
+        RenderNode(*node);
     }
-    for (CameraFixedObject& cameraFixedObject : scene.GetCameraFixedObjects())
-    {
-        if (cameraFixedObject.IsActive())
-        {
-            cameraFixedObject.GetTransform().Translate(glm::vec3{0.0f, 0.0f, -0.05f});
-            
-            //FIXME: DrawCameraFixedObject(cameraFixedObject, cameraFixedObject.GetCamera());  
-            //DrawCameraFixedObject(cameraFixedObject, GetCamera());  
-        }  
-    }
+
+    // for (CameraFixedObject& cameraFixedObject : scene.GetCameraFixedObjects())
+    // {
+    //     if (cameraFixedObject.IsActive())
+    //     {
+    //         //cameraFixedObject.GetTransform().Translate(glm::vec3{0.0f, 0.0f, -0.05f});     
+    //         //FIXME: DrawCameraFixedObject(cameraFixedObject, cameraFixedObject.GetCamera());  
+    //         DrawCameraFixedObject(cameraFixedObject, GetCamera());  
+    //     }  
+    // }
 }

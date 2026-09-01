@@ -25,10 +25,11 @@ Camera& CameraFixedObject::GetCamera() const
 glm::mat4 CameraFixedObject::GetMatrix()
 {
     glm::mat4 lookAt{1.0f};
-    lookAt[0] = glm::vec4(camera->GetRightVector(), 0.0f);
-    lookAt[1] = glm::vec4(camera->GetUpVector(), 0.0f);
-    lookAt[2] = glm::vec4(-camera->GetForwardVector(), 0.0f);
-    lookAt[3] = glm::vec4(camera->GetPositionVector() + camera->GetForwardVector() * 4.5f, 1.0f);
+    //FIXME:
+    // lookAt[0] = glm::vec4(camera->GetRightVector(), 0.0f);
+    // lookAt[1] = glm::vec4(camera->GetUpVector(), 0.0f);
+    // lookAt[2] = glm::vec4(-camera->GetForwardVector(), 0.0f);
+    // lookAt[3] = glm::vec4(camera->GetPositionVector() + camera->GetForwardVector() * 4.5f, 1.0f);
 
-    return lookAt * GetTransform().GetMatrix();
+    return lookAt * GetLocalTransform().GetMatrix();
 }

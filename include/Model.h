@@ -25,7 +25,7 @@ private:
 
     std::vector<Vertex> vertices;
 
-    Texture* texture;
+    Texture* texture{nullptr};
 
     bool LoadModelFromObj(const std::string& modelFilename);
     void InitializeModel();
@@ -37,6 +37,7 @@ public:
 
     void SetTexture(Texture& newTexture);
     const Texture& GetTexture() const;
+    bool HasTexture() const;
 
     void DrawModel() const;
 };

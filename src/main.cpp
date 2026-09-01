@@ -3,7 +3,6 @@
 #include <iostream>
 #include <string>
 #include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 #include "Camera.h"
 #include "CameraController.h"
@@ -49,7 +48,11 @@ int main()
 #endif
 
     // Create a GLFW window
-    GLFWwindow* window = glfwCreateWindow(800, 600, "OpenGL Intro Project", nullptr, nullptr);
+#ifdef __APPLE__
+    GLFWwindow* window = glfwCreateWindow(1080, 720, "OpenGL Intro Project", nullptr, nullptr);
+#else
+    GLFWwindow* window = glfwCreateWindow(3200, 1800, "OpenGL Intro Project", nullptr, nullptr);
+#endif
     if (window == nullptr)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -116,7 +119,9 @@ int main()
 
     InitializeOpenGLParameters();
     InitializeScene(game.GetCurrScene());
-    game.GetCameraController().SetCamera(game.GetCurrScene().GetCameras().back());
+    game.GetCameraController().SetCamera(*game.GetCurrScene().GetCameras().back());
+
+    game.GetRenderer().SetShowColliders(true);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -161,11 +166,16 @@ int main()
 void InitializeScene(Scene& scene)
 {
     // ==== OBJECT 0 - GROUND ====
-    Object& ground = scene.AddObject(planeObjFilename, rockTextureFilename);
-    ground.GetTransform().scaleVector = glm::vec3{2.0f};
-    ground.GetTransform().positionVector = glm::vec3{0.0f, 0.0f, 0.0f};
+    GameObject& ground = scene.AddGameObject(planeObjFilename, rockTextureFilename);
+    ground.SetObjectName("ground");
+    ground.GetLocalTransform().scaleVector = glm::vec3{2.0f};
+    ground.GetLocalTransform().positionVector = glm::vec3{0.0f, 0.0f, 0.0f};
     // ground.UseTexture(false);
     ground.SetColor(RGBAtoVec4(29, 43, 35, 255));
+    ground.SetCollider(Collider{ColliderShape::Box, 0.0f, {10.0f, 0.0f, 10.0f}});
+
+    GameObject& o = scene.AddGameObject(planeObjFilename, rockTextureFilename);
+    o.GetLocalTransform().positionVector = glm::vec3{30.0f, 0.0f, 0.0f};
 
     // ==== OBJECT 1 - WALLS =====
 
@@ -179,32 +189,34 @@ void InitializeScene(Scene& scene)
      * [a, &b]: capture 'a' by value and 'b' by reference
      */
     auto AddWall = [&](glm::vec3 scaleVector, glm::vec3 positionVector) {
-        Object& wall = scene.AddObject(cubeObjFilename, wallTextureFilename);
-        wall.GetTransform().scaleVector = scaleVector;
-        wall.GetTransform().positionVector = positionVector;
+        GameObject& wall = scene.AddGameObject(cubeObjFilename, wallTextureFilename);
+        wall.SetObjectName("wall");
+        wall.GetLocalTransform().scaleVector = scaleVector;
+        wall.GetLocalTransform().positionVector = positionVector;
         wall.SetCollider(Collider{ColliderShape::Box, 0.0f, glm::vec3{1.0f}, glm::vec3{0.0f}});
     };
-    AddWall(glm::vec3{20.0f, 8.0f, 0.5f}, glm::vec3{0.0f, 5.0f, 20.0f});
-    AddWall(glm::vec3{20.0f, 8.0f, 0.5f}, glm::vec3{0.0f, 5.0f, -20.0f});
-    AddWall(glm::vec3{0.5f, 8.0f, 20.0f}, glm::vec3{-20.0f, 5.0f, 0.0f});
-    AddWall(glm::vec3{0.5f, 8.0f, 20.0f}, glm::vec3{20.0f, 5.0f, 0.0f});
+    AddWall(glm::vec3{20.0f, 3.0f, 0.5f}, glm::vec3{0.0f, 1.5f, 20.0f});
+    AddWall(glm::vec3{20.0f, 3.0f, 0.5f}, glm::vec3{0.0f, 1.5f, -20.0f});
+    AddWall(glm::vec3{0.5f, 3.0f, 20.0f}, glm::vec3{-20.0f, 1.5f, 0.0f});
+    //AddWall(glm::vec3{0.5f, 3.0f, 20.0f}, glm::vec3{20.0f, 1.5f, 0.0f});
     
     // ==== OBJECT 2 - CAT ========
-    Object& cat = scene.AddObject(catObjFilename, marbleTextureFilename);
-    cat.GetTransform().scaleVector = glm::vec3{20.0f};
-    cat.GetTransform().rotationVector.y = 30.0f;
-    cat.GetTransform().positionVector = glm::vec3{7.0f, 2.0f, -8.f};
-    cat.SetCollider(Collider{ColliderShape::Box, 0.0f, glm::vec3{0.01f}});
+    GameObject& cat = scene.AddGameObject(catObjFilename);
+    cat.SetObjectName("cat");
+    cat.GetLocalTransform().scaleVector = glm::vec3{10.0f};
+    cat.GetLocalTransform().SetRotationEuler(glm::vec3{0.0f, 30.f, 0.0f});
+    cat.GetLocalTransform().positionVector = glm::vec3{7.0f, 0.5f, -8.f};
+    cat.SetCollider(Collider{ColliderShape::Box, 0.0f, glm::vec3{0.05f, 0.1f, 0.05f}, glm::vec3{0.0f, 0.05f, 0.0f}});
     cat.SetColor(RGBAtoVec4(188, 143, 196, 200));
 
     // == CAMERA FIXED OBJECT 0 - SPHERE ==
-    CameraFixedObject& sphere = scene.AddCameraFixedObject(sphereObjFilename, redTextureFilename);
-    sphere.GetTransform().scaleVector = glm::vec3{0.5f};
+    //CameraFixedObject& sphere = scene.AddCameraFixedObject(sphereObjFilename, redTextureFilename);
+    //sphere.GetTransform().scaleVector = glm::vec3{0.5f};
 
     // ===== CAMERA 0 =============
     Camera& camera = scene.AddCamera();
-    camera.SetPosition(glm::vec3{2.0f, 2.0f, 1.0f});
-    camera.SetRotation(glm::vec3{0.0f, 0.0f, 0.0f});
+    camera.GetLocalTransform().positionVector = glm::vec3{2.0f, 2.0f, 1.0f};
+    camera.GetLocalTransform().SetRotationEuler(glm::vec3{0.0f, 0.0f, 0.0f});
 }
 
 /// <summary>
@@ -222,14 +234,24 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 {
     switch(key) 
     {
-    case GLFW_KEY_ESCAPE: // quit
-        glfwSetWindowShouldClose(window, true);
-        exit(EXIT_SUCCESS);
+    case GLFW_KEY_ESCAPE: 
+        if (mods == GLFW_MOD_ALT && action == GLFW_PRESS) // quit
+        {
+            glfwSetWindowShouldClose(window, true);
+            exit(EXIT_SUCCESS);
+        }
+        else
+        {
+            if (glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_NORMAL)
+                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            else
+                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        }
         break;
     case GLFW_KEY_H: // change camera to scene camera
         globalGame->GetPlayerController().SetActive(false);
         globalGame->GetCameraController().SetActive(true);
-        globalGame->GetRenderer().SetCamera(globalGame->GetCurrScene().GetCameras().back());
+        globalGame->GetRenderer().SetCamera(*globalGame->GetCurrScene().GetCameras().back());
         break;
     case GLFW_KEY_J: // change camera to player camera
         globalGame->GetPlayerController().SetActive(true);

@@ -1,38 +1,47 @@
 #include "Scene.h"
+#include "Camera.h"
 
 Scene::Scene(ResourceManager& resourceManagerRef)
     : resourceManager(resourceManagerRef)
 {
-    objects.reserve(10);
     cameraFixedObjects.reserve(10);
-    cameras.reserve(10);
 }
 
-Object& Scene::AddObject(Model& modelRef)
+GameObject& Scene::AddGameObject(Model& modelRef)
 {
-    objects.emplace_back(modelRef);
-    return objects.back();
+    GameObject& gameObject = AddNode<GameObject>(modelRef);
+
+    if (!modelRef.HasTexture())
+    {
+        gameObject.UseTexture(false);
+    }
+
+    return gameObject;
 }
 
-Object& Scene::AddObject(const std::string& modelFilename)
+GameObject& Scene::AddGameObject(const std::string& modelFilename)
 {
     Model& modelRef = resourceManager.GetOrLoadModel(modelFilename);
-    return AddObject(modelRef);
+    return AddGameObject(modelRef);
 }
 
-Object& Scene::AddObject(const std::string& modelFilename, const std::string& textureFilename)
+GameObject& Scene::AddGameObject(const std::string& modelFilename, const std::string& textureFilename)
 {
     Model& modelRef = resourceManager.GetOrLoadModel(modelFilename);
     Texture& textureRef = resourceManager.GetOrLoadTexture(textureFilename);
 
     modelRef.SetTexture(textureRef);
 
-    return AddObject(modelRef);
+    return AddGameObject(modelRef);
 }
 
 CameraFixedObject& Scene::AddCameraFixedObject(Model& modelRef)
 {
     cameraFixedObjects.emplace_back(modelRef);
+    if (!modelRef.HasTexture())
+    {
+        cameraFixedObjects.back().UseTexture(false);
+    }
     return cameraFixedObjects.back();
 }
 
@@ -54,21 +63,58 @@ CameraFixedObject& Scene::AddCameraFixedObject(const std::string& modelFilename,
 
 Camera& Scene::AddCamera()
 {
-    cameras.emplace_back();
-    return cameras.back();
+    Camera& camera = AddNode<Camera>();
+    return camera;
 }
 
-std::vector<Object>& Scene::GetObjects()
+std::vector<std::unique_ptr<SceneNode>>& Scene::GetSceneNodes()
 {
-    return objects;
+    return sceneNodes;
+}
+
+std::vector<GameObject*> Scene::GetGameObjects() const
+{
+    std::vector<GameObject*> gameObjects;
+    for (const auto& node : sceneNodes)
+    {
+        GetNodeGameObjects(*node, gameObjects);
+    }
+    return gameObjects;
+}
+
+void Scene::GetNodeGameObjects(const SceneNode& node, std::vector<GameObject*>& gameObjects) const
+{
+    if (!node.IsActive())
+    {
+        return;
+    }
+
+    if (const GameObject* gameObject = dynamic_cast<const GameObject*>(&node))
+    {
+        gameObjects.push_back(const_cast<GameObject*>(gameObject));
+    }
+
+    for (const SceneNode* child : node.GetChildren())
+    {
+        GetNodeGameObjects(*child, gameObjects);
+    }
+}
+
+std::vector<Camera*> Scene::GetCameras() const
+{
+    // FIXME: Assuming cameras are not child objects
+    std::vector<Camera*> cameras;
+    for (const auto& node : sceneNodes)
+    {
+        if (const Camera* camera = dynamic_cast<const Camera*>(node.get()))
+        {
+            cameras.push_back(const_cast<Camera*>(camera));
+        }
+    }
+    return cameras;
 }
 
 std::vector<CameraFixedObject>& Scene::GetCameraFixedObjects()
 {
     return cameraFixedObjects;
-}
-
-std::vector<Camera>& Scene::GetCameras()
-{
-    return cameras;
 }

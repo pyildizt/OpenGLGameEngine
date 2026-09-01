@@ -1,15 +1,16 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
+#include "SceneNode.h"
+
 #include <glad/glad.h>
 #include <glm/gtc/matrix_transform.hpp>
 
-class Camera 
+class Camera : public SceneNode
 {
 private:
     int cameraID;
 
-    glm::vec3 positionVector{0.0f, 2.0f, 3.0f};
     glm::vec3 rotationVector{0.0f};
 
     glm::vec3 forwardVector{0.0f, 0.0f, -1.0f};
@@ -25,15 +26,10 @@ public:
 
     int GetCameraID() const;
 
-    glm::mat4 GetViewMatrix() const;
-
     void RotateRelative(glm::vec3 amount);
-    void SetRotation(glm::vec3 newVal);
     glm::vec3 GetRotationVector() const;
 
-    void Translate(glm::vec3 amount);
-    void SetPosition(glm::vec3 newVal);
-    glm::vec3 GetPositionVector() const;
+    glm::mat4 GetViewMatrix() const;
 
     glm::vec3 GetForwardVector();
     glm::vec3 GetRightVector();

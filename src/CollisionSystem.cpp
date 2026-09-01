@@ -1,5 +1,6 @@
 #include "CollisionSystem.h"
 
+#include "GameObject.h"
 #include "ICollidable.h"
 #include "PlayerController.h"
 
@@ -12,12 +13,12 @@ CollisionSystem::CollisionSystem()
 
 void CollisionSystem::Update(PlayerController& playerController, Scene& scene)
 {
-    for (const Object& object : scene.GetObjects())
+    for (GameObject* gameObject : scene.GetGameObjects())
     {
-        if (DetectCollision(playerController, object))
+        if (DetectCollision(playerController, *gameObject))
         {
-            std::cout << "COLLISION with " << object.GetObjectID() << "\n";
-            HandleCollision(playerController, object);
+            std::cout << "COLLISION with " << gameObject->GetGameObjectID() << ": " << gameObject->GetObjectName() << "\n";
+            HandleCollision(playerController, *gameObject);
         }
     }
 }
@@ -77,17 +78,17 @@ void CollisionSystem::HandleCollision(PlayerController& playerController, const 
         if (collisionAmount.x <= collisionAmount.z && collisionAmount.x <= collisionAmount.y)
         {
             float movementDirection = playerCollider.center.x < objCollider.center.x ? -1.0f : 1.0f;
-            playerController.GetPlayerCamera().Translate(glm::vec3{movementDirection * collisionAmount.x, 0.0f, 0.0f});
+            playerController.GetPlayerCamera().GetLocalTransform().Translate(glm::vec3{movementDirection * collisionAmount.x, 0.0f, 0.0f});
         }
         else if (collisionAmount.z < collisionAmount.x && collisionAmount.z <= collisionAmount.y)
         {
             float movementDirection = playerCollider.center.z < objCollider.center.z ? -1.0f : 1.0f;
-            playerController.GetPlayerCamera().Translate(glm::vec3{0.0f, 0.0f, movementDirection * collisionAmount.z});
+            playerController.GetPlayerCamera().GetLocalTransform().Translate(glm::vec3{0.0f, 0.0f, movementDirection * collisionAmount.z});
         }
         else 
         {
             float movementDirection = playerCollider.center.y < objCollider.center.y ? -1.0f : 1.0f;
-            playerController.GetPlayerCamera().Translate(glm::vec3{0.0f, movementDirection * collisionAmount.y, 0.0f});
+            playerController.GetPlayerCamera().GetLocalTransform().Translate(glm::vec3{0.0f, movementDirection * collisionAmount.y, 0.0f});
         }
     }
     //TODO: Handle box-to-sphere and maybe sphere-to-sphere collisions

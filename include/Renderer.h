@@ -3,7 +3,7 @@
 
 #include "Camera.h"
 #include "CameraFixedObject.h"
-#include "Object.h"
+#include "RenderObject.h"
 #include "Projection.h"
 #include "Scene.h"
 #include "Shader.h"
@@ -39,9 +39,10 @@ public:
     void DrawColliders(Scene& scene);
 
     void BeginFrame();
-    void DrawObject(const Object& object);
+    void DrawRenderObject(const RenderObject& renderObject);
     void DrawCameraFixedObject(CameraFixedObject& cameraFixedObject, Camera& cameraRef);
 
+    void RenderNode(const SceneNode& sceneNode);
     void RenderScene(Scene& scene);
 };
 

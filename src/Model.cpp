@@ -30,6 +30,11 @@ const Texture& Model::GetTexture() const
     return *texture;
 }
 
+bool Model::HasTexture() const
+{
+    return texture != nullptr;
+}
+
 bool Model::LoadModelFromObj(const std::string& modelFilename)
 {
     tinyobj::ObjReader objReader;
@@ -91,9 +96,12 @@ void Model::DrawModel() const
 {
     glBindVertexArray(VAO);
 
-    glActiveTexture(GL_TEXTURE0);
-    texture->BindTexture();
-    
+    if (HasTexture())
+    {
+        glActiveTexture(GL_TEXTURE0);
+        texture->BindTexture();
+    }
+
     glDrawArrays(GL_TRIANGLES, 0, vertices.size());
     // glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 }

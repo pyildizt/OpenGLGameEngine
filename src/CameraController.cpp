@@ -52,32 +52,32 @@ void CameraController::HandleMovement(float deltaTime)
         glm::vec3 forwardVector = camera->GetForwardVector();
         forwardVector.y = 0;
         forwardVector = glm::normalize(forwardVector);
-        camera->Translate(forwardVector * distanceAmount * deltaTime);
+        camera->GetLocalTransform().Translate(forwardVector * distanceAmount * deltaTime);
     }
     else if (inputManager.IsKeyPressed(GLFW_KEY_S))
     {
         glm::vec3 forwardVector = camera->GetForwardVector();
         forwardVector.y = 0;
         forwardVector = glm::normalize(forwardVector);
-        camera->Translate(-forwardVector * distanceAmount * deltaTime);
+        camera->GetLocalTransform().Translate(-forwardVector * distanceAmount * deltaTime);
     }
 
     if (inputManager.IsKeyPressed(GLFW_KEY_D))
     {
-        camera->Translate(camera->GetRightVector() * distanceAmount * deltaTime);
+        camera->GetLocalTransform().Translate(camera->GetRightVector() * distanceAmount * deltaTime);
     }
     else if (inputManager.IsKeyPressed(GLFW_KEY_A))
     {
-        camera->Translate(-camera->GetRightVector() * distanceAmount * deltaTime);
+        camera->GetLocalTransform().Translate(-camera->GetRightVector() * distanceAmount * deltaTime);
     }
 
     if (inputManager.IsKeyPressed(GLFW_KEY_Q))
     {
-        camera->Translate(glm::vec3{0.0f, 1.0f, 0.0f} * distanceAmount * deltaTime);
+        camera->GetLocalTransform().Translate(glm::vec3{0.0f, 1.0f, 0.0f} * distanceAmount * deltaTime);
     }
     else if (inputManager.IsKeyPressed(GLFW_KEY_E))
     {
-        camera->Translate(glm::vec3{0.0f, -1.0f, 0.0f} * distanceAmount * deltaTime);
+        camera->GetLocalTransform().Translate(glm::vec3{0.0f, -1.0f, 0.0f} * distanceAmount * deltaTime);
     }
 }
 
