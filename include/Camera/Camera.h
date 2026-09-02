@@ -3,7 +3,6 @@
 
 #include "Scene/SceneNode.h"
 
-#include <glad/glad.h>
 #include <glm/gtc/matrix_transform.hpp>
 
 class Camera : public SceneNode

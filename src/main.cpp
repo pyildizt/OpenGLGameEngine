@@ -1,6 +1,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <ostream>
 #include <string>
 #include <glm/glm.hpp>
 
@@ -49,7 +50,7 @@ int main()
 
     // Create a GLFW window
 #ifdef __APPLE__
-    GLFWwindow* window = glfwCreateWindow(1080, 720, "OpenGL Intro Project", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(960, 640, "OpenGL Intro Project", nullptr, nullptr);
 #else
     GLFWwindow* window = glfwCreateWindow(3200, 1800, "OpenGL Intro Project", nullptr, nullptr);
 #endif
@@ -82,46 +83,17 @@ int main()
     glfwSetKeyCallback(window, KeyCallback);
     glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
 
-    // =============== INITIALIZE MAIN RENDERER ===============
-    /*
-    // Create and activate shader
-    Shader shader{vertexShaderFilepath, fragmentShaderFilepath};
-    shader.ActivateShaderProgram();
-
-    // Create input manager and player controller for player camera
-    InputManager inputManager{window};
-    globalInputManager = &inputManager;
-
-    PlayerController playerController{inputManager};
-    globalPlayerController = &playerController;
-    currCamera = &playerController.GetPlayerCamera();
-
-    CameraController cameraController{inputManager};
-    globalCameraController = &cameraController;
-    cameraController.SetCamera(*currCamera);
-
-    // Create collision system
-    CollisionSystem collisionSystem{};
-
-    // Create resource manager and main scene
-    ResourceManager resourceManager{};
-    Scene mainScene{resourceManager};
-    globalScene = &mainScene;
-
-    // Create main renderer
-    Renderer renderer{shader, playerController.GetPlayerCamera()};
-    globalRenderer = &renderer;
-    */
-
+    // =============== INITIALIZE MAIN GAME ===============
     Game game{window};
     globalGame = &game;
-    // =========================================================
 
     InitializeOpenGLParameters();
     InitializeScene(game.GetCurrScene());
     game.GetCameraController().SetCamera(*game.GetCurrScene().GetCameras().back());
 
-    game.GetRenderer().SetShowColliders(true);
+    game.GetRenderer().GetColliderRenderer().SetShowColliders(true);
+    game.GetRenderer().GetGridRenderer().SetShowGrid(true);
+    // ====================================================
 
     while (!glfwWindowShouldClose(window))
     {
@@ -133,6 +105,7 @@ int main()
         // =============== MAIN RENDER LOOP ===============
         Renderer& renderer = game.GetRenderer();
         Scene& currScene = game.GetCurrScene();
+
         // Handle input
         game.GetPlayerController().Update(deltaTime);
         game.GetCameraController().Update(deltaTime);
@@ -142,11 +115,10 @@ int main()
         game.GetCollisionSystem().Update(game.GetPlayerController(), currScene);
 
         // Render scene
-        game.GetRenderer().RenderScene(currScene);
+        renderer.RenderScene(currScene);
 
-        // Render colliders
-        renderer.DrawColliders(currScene);
-        renderer.DrawCollider(game.GetPlayerController());
+        // Render player collider
+        renderer.GetColliderRenderer().DrawCollider(game.GetPlayerController(), renderer.GetShader());
         // ================================================
 
         // Check and call events and swap the buffers
@@ -207,7 +179,7 @@ void InitializeScene(Scene& scene)
     cat.GetLocalTransform().positionVector = glm::vec3{7.0f, 0.5f, -8.f};
     cat.SetColor(RGBAtoVec4(188, 143, 196, 200));
 
-    // === RENDER OBJECT - SPHERE ===
+    // === RENDER OBJECT 0 - SPHERES ===
     RenderObject& sphere1 = scene.AddRenderObject(sphereObjFilename);
     sphere1.GetLocalTransform().scaleVector = glm::vec3{0.5f};
     sphere1.SetColor(RGBAtoVec4(180, 0, 0, 255));
@@ -247,10 +219,13 @@ void InitializeOpenGLParameters()
 
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
+    if (action != GLFW_PRESS)
+        return;
+
     switch(key) 
     {
     case GLFW_KEY_ESCAPE: 
-        if (mods == GLFW_MOD_ALT && action == GLFW_PRESS) // quit
+        if (mods == GLFW_MOD_ALT) // quit
         {
             glfwSetWindowShouldClose(window, true);
             exit(EXIT_SUCCESS);
@@ -263,7 +238,10 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
                 glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         }
         break;
-    case GLFW_KEY_H: // change camera to scene camera
+    case GLFW_KEY_H: // help - print help
+        std::cout << "=======================\nAlt+Esc: Quit\nEsc: Change cursor mode\nJ: Player camera\nK: Scene camera\nC: Show colliders\n=======================" << std::endl;
+        break;
+    case GLFW_KEY_K: // change camera to scene camera
         globalGame->GetPlayerController().SetActive(false);
         globalGame->GetCameraController().SetActive(true);
         globalGame->GetRenderer().SetCamera(*globalGame->GetCurrScene().GetCameras().back());
@@ -272,6 +250,16 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
         globalGame->GetPlayerController().SetActive(true);
         globalGame->GetCameraController().SetActive(false);
         globalGame->GetRenderer().SetCamera(globalGame->GetPlayerController().GetPlayerCamera());
+        break;
+    case GLFW_KEY_C: // toggle show colliders
+        globalGame->GetRenderer().GetColliderRenderer().SetShowColliders(
+            !globalGame->GetRenderer().GetColliderRenderer().ShowColliders()
+        );
+        break;
+    case GLFW_KEY_G: // toggle show grid
+        globalGame->GetRenderer().GetGridRenderer().SetShowGrid(
+            !globalGame->GetRenderer().GetGridRenderer().ShowGrid()
+        );
         break;
     }
 }

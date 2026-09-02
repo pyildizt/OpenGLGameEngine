@@ -4,9 +4,10 @@
 #include "Camera/Camera.h"
 #include "Camera/Projection.h"
 #include "Core/Scene.h"
+#include "Rendering/ColliderRenderer.h"
+#include "Rendering/GridRenderer.h"
+#include "Rendering/SceneRenderer.h"
 #include "Rendering/Shader.h"
-#include "Scene/CameraFixedObject.h"
-#include "Scene/RenderObject.h"
 
 class Renderer
 {
@@ -15,14 +16,15 @@ private:
     Projection projection;
     Camera* camera;
 
-    bool showColliders{};
-    GLuint boxColliderVAO, boxColliderVBO, boxColliderEBO;
+    SceneRenderer sceneRenderer;
+    ColliderRenderer colliderRenderer;
+    GridRenderer gridRenderer;
 
 public:
     Renderer();
-    Renderer(Shader& shaderRef, Camera& cameraRef);
+    Renderer(Shader& shaderRef, Camera &cameraRef);
 
-    void InitializeRenderer(Shader& shaderRef, Camera& cameraRef);
+    void InitializeRenderer(Shader& shaderRef, Camera &cameraRef);
 
     void SetShader(Shader& newShader);
     Shader& GetShader() const;
@@ -32,17 +34,15 @@ public:
     void SetCamera(Camera& newCamera);
     Camera& GetCamera() const;
 
-    void SetShowColliders(bool newVal);
-    bool ShowColliders() const;
-    void InitializeColliders();
-    void DrawCollider(const ICollidable& collidable);
-    void DrawColliders(Scene& scene);
+    SceneRenderer& GetSceneRenderer();
+    const SceneRenderer& GetSceneRenderer() const;
+    
+    ColliderRenderer& GetColliderRenderer();
+    const ColliderRenderer& GetColliderRenderer() const;
 
-    void BeginFrame();
-    void DrawRenderObject(const RenderObject& renderObject);
-    void DrawCameraFixedObject(CameraFixedObject& cameraFixedObject, Camera& cameraRef);
+    GridRenderer& GetGridRenderer();
+    const GridRenderer& GetGridRenderer() const;
 
-    void RenderNode(const SceneNode& sceneNode);
     void RenderScene(Scene& scene);
 };
 
