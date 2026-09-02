@@ -38,7 +38,7 @@ find_package(glm REQUIRED)
 # Executable
 # ============================================
 
-file(GLOB SRC_FILES CONFIGURE_DEPENDS
+file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS
     src/*.cpp
 )
 

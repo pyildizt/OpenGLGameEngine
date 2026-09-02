@@ -4,16 +4,16 @@
 #include <string>
 #include <glm/glm.hpp>
 
-#include "Camera.h"
-#include "CameraController.h"
-#include "CollisionSystem.h"
-#include "Game.h"
-#include "ICollidable.h"
-#include "InputManager.h"
-#include "PlayerController.h"
-#include "Renderer.h"
-#include "Scene.h"
-#include "Utils.h"
+#include "Camera/Camera.h"
+#include "Camera/CameraController.h"
+#include "Core/CollisionSystem.h"
+#include "Core/Game.h"
+#include "Core/InputManager.h"
+#include "Core/PlayerController.h"
+#include "Core/Scene.h"
+#include "Rendering/Renderer.h"
+#include "Scene/RenderObject.h"
+#include "Utilities/Utils.h"
 
 void InitializeOpenGLParameters();
 void InitializeScene(Scene& scene);
@@ -201,13 +201,28 @@ void InitializeScene(Scene& scene)
     //AddWall(glm::vec3{0.5f, 3.0f, 20.0f}, glm::vec3{20.0f, 1.5f, 0.0f});
     
     // ==== OBJECT 2 - CAT ========
-    GameObject& cat = scene.AddGameObject(catObjFilename);
-    cat.SetObjectName("cat");
+    RenderObject& cat = scene.AddRenderObject(catObjFilename);
     cat.GetLocalTransform().scaleVector = glm::vec3{10.0f};
     cat.GetLocalTransform().SetRotationEuler(glm::vec3{0.0f, 30.f, 0.0f});
     cat.GetLocalTransform().positionVector = glm::vec3{7.0f, 0.5f, -8.f};
-    cat.SetCollider(Collider{ColliderShape::Box, 0.0f, glm::vec3{0.05f, 0.1f, 0.05f}, glm::vec3{0.0f, 0.05f, 0.0f}});
     cat.SetColor(RGBAtoVec4(188, 143, 196, 200));
+
+    // === RENDER OBJECT - SPHERE ===
+    RenderObject& sphere1 = scene.AddRenderObject(sphereObjFilename);
+    sphere1.GetLocalTransform().scaleVector = glm::vec3{0.5f};
+    sphere1.SetColor(RGBAtoVec4(180, 0, 0, 255));
+    sphere1.GetLocalTransform().positionVector = glm::vec3{0.0f, 1.0f, 0.0f};
+
+    RenderObject& sphere2 = scene.AddRenderObject(sphereObjFilename);
+    sphere2.GetLocalTransform().scaleVector = glm::vec3{0.5f};
+    sphere2.SetColor(RGBAtoVec4(0, 180, 0, 255));
+    sphere2.GetLocalTransform().positionVector = glm::vec3{3.0f, 1.0f, 0.0f};
+
+    RenderObject& sphere3 = scene.AddRenderObject(sphereObjFilename);
+    sphere3.GetLocalTransform().scaleVector = glm::vec3{1.0f};
+    sphere3.SetColor(RGBAtoVec4(0, 0, 180, 255));
+    sphere3.GetLocalTransform().positionVector = glm::vec3{3.0f, 1.0f, 0.0f};
+    sphere3.SetParent(&sphere1);
 
     // == CAMERA FIXED OBJECT 0 - SPHERE ==
     //CameraFixedObject& sphere = scene.AddCameraFixedObject(sphereObjFilename, redTextureFilename);
