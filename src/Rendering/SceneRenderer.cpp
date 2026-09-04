@@ -48,6 +48,7 @@ void SceneRenderer::RenderNode(const SceneNode& sceneNode, Shader& shader)
 
 void SceneRenderer::RenderScene(Scene& scene, Shader& shader, Projection& projection, Camera& camera)
 {
+    shader.ActivateShaderProgram();
     shader.SetMat4(shader.GetUniformLocation("projection"), projection.GetProjection());
     shader.SetMat4(shader.GetUniformLocation("view"), camera.GetViewMatrix());    
 

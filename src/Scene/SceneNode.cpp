@@ -2,10 +2,19 @@
 
 #include <algorithm>
 
+int SceneNode::sceneNodeCount = 0;
+
 SceneNode::SceneNode()
 {
+    nodeID = sceneNodeCount++;
+    nodeName = "node " + std::to_string(nodeID);
     isActive = true;
     localTransform = Transform{}; 
+}
+
+int SceneNode::GetSceneNodeID() const
+{
+    return nodeID;
 }
 
 void SceneNode::SetActive(bool newVal)
@@ -16,6 +25,21 @@ void SceneNode::SetActive(bool newVal)
 bool SceneNode::IsActive() const
 {
     return isActive;
+}
+
+void SceneNode::SetNodeName(const std::string& newName)
+{
+    nodeName = newName;
+}
+
+void SceneNode::AddNodeName(const std::string& appendName)
+{
+    nodeName = nodeName + ": " + appendName;
+}
+
+const std::string& SceneNode::GetNodeName() const
+{
+    return nodeName;
 }
 
 Transform& SceneNode::GetLocalTransform()

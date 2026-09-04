@@ -3,11 +3,11 @@
 
 #include "Camera/Camera.h"
 #include "Core/ResourceManager.h"
-#include "Scene/CameraFixedObject.h"
 #include "Scene/GameObject.h"
 #include "Scene/RenderObject.h"
 #include "Scene/SceneNode.h"
 
+#include <unordered_map>
 #include <vector>
 
 class Scene
@@ -17,7 +17,7 @@ private:
 
     std::vector<std::unique_ptr<SceneNode>> sceneNodes;
 
-    std::vector<CameraFixedObject> cameraFixedObjects;
+    std::unordered_map<unsigned int, RenderObject*> pickingRenderObjectMap;
 
 public:
     Scene(ResourceManager& resourceManagerRef);
@@ -41,10 +41,6 @@ public:
     GameObject& AddGameObject(const std::string& modelFilename);
     GameObject& AddGameObject(const std::string& modelFilename, const std::string& textureFilename);
 
-    CameraFixedObject& AddCameraFixedObject(Model& modelRef);
-    CameraFixedObject& AddCameraFixedObject(const std::string& modelFilename);
-    CameraFixedObject& AddCameraFixedObject(const std::string& modelFilename, const std::string& textureFilename);
-
     Camera& AddCamera();
 
     std::vector<std::unique_ptr<SceneNode>>& GetSceneNodes();
@@ -55,7 +51,7 @@ public:
     std::vector<Camera*> GetCameras() const;
     void GetNodeCameras(const SceneNode& node, std::vector<Camera*>& cameras) const;
 
-    std::vector<CameraFixedObject>& GetCameraFixedObjects();
+    std::unordered_map<unsigned int, RenderObject*>& GetPickingRenderObjectMap();
 };
 
 #endif

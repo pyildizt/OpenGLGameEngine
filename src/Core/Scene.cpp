@@ -3,7 +3,7 @@
 Scene::Scene(ResourceManager& resourceManagerRef)
     : resourceManager(resourceManagerRef)
 {
-    cameraFixedObjects.reserve(10);
+
 }
 
 SceneNode& Scene::AddSceneNode()
@@ -14,10 +14,12 @@ SceneNode& Scene::AddSceneNode()
 RenderObject& Scene::AddRenderObject(Model& modelRef)
 {
     RenderObject& renderObject = AddNode<RenderObject>(modelRef);
+    renderObject.SetNodeName("renderObj " + std::to_string(renderObject.GetSceneNodeID()));
     if (!modelRef.HasTexture())
     {
         renderObject.UseTexture(false);
     }
+    pickingRenderObjectMap[renderObject.GetPickingID()] = &renderObject;
     return renderObject;
 }
 
@@ -39,12 +41,12 @@ RenderObject& Scene::AddRenderObject(const std::string& modelFilename, const std
 GameObject& Scene::AddGameObject(Model& modelRef)
 {
     GameObject& gameObject = AddNode<GameObject>(modelRef);
-
+    gameObject.SetNodeName("gameObj " + std::to_string(gameObject.GetSceneNodeID()));
     if (!modelRef.HasTexture())
     {
         gameObject.UseTexture(false);
     }
-
+    pickingRenderObjectMap[gameObject.GetPickingID()] = &gameObject;
     return gameObject;
 }
 
@@ -64,35 +66,10 @@ GameObject& Scene::AddGameObject(const std::string& modelFilename, const std::st
     return AddGameObject(modelRef);
 }
 
-CameraFixedObject& Scene::AddCameraFixedObject(Model& modelRef)
-{
-    cameraFixedObjects.emplace_back(modelRef);
-    if (!modelRef.HasTexture())
-    {
-        cameraFixedObjects.back().UseTexture(false);
-    }
-    return cameraFixedObjects.back();
-}
-
-CameraFixedObject& Scene::AddCameraFixedObject(const std::string& modelFilename)
-{
-    Model& modelRef = resourceManager.GetOrLoadModel(modelFilename);
-    return AddCameraFixedObject(modelRef);
-}
-
-CameraFixedObject& Scene::AddCameraFixedObject(const std::string& modelFilename, const std::string& textureFilename)
-{
-    Model& modelRef = resourceManager.GetOrLoadModel(modelFilename);
-    Texture& textureRef = resourceManager.GetOrLoadTexture(textureFilename);
-
-    modelRef.SetTexture(textureRef);
-    
-    return AddCameraFixedObject(modelRef);
-}
-
 Camera& Scene::AddCamera()
 {
     Camera& camera = AddNode<Camera>();
+    camera.SetNodeName("camera " + std::to_string(camera.GetSceneNodeID()));
     return camera;
 }
 
@@ -160,7 +137,7 @@ void Scene::GetNodeCameras(const SceneNode& node, std::vector<Camera*>& cameras)
     }
 }
 
-std::vector<CameraFixedObject>& Scene::GetCameraFixedObjects()
+std::unordered_map<unsigned int, RenderObject*>& Scene::GetPickingRenderObjectMap()
 {
-    return cameraFixedObjects;
+    return pickingRenderObjectMap;
 }

@@ -47,7 +47,7 @@ void Transform::RotateRelative(glm::vec3 amount)
 }
 
 /// <summary>
-/// Rotate around the given axis by given amount
+/// Rotate around the given axis by given amount (degrees)
 /// </summary>
 void Transform::RotateRelative(float amount, glm::vec3 axis)
 {

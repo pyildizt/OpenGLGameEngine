@@ -6,7 +6,11 @@
 class SceneNode
 {
 private:
+    unsigned int nodeID;
+
     bool isActive{true};
+
+    std::string nodeName{};
 
     Transform localTransform;
 
@@ -17,11 +21,19 @@ private:
     void RemoveChild(SceneNode& child);
 
 public:
+    static int sceneNodeCount;
+
     SceneNode();
     virtual ~SceneNode() = default;
 
+    int GetSceneNodeID() const;
+
     void SetActive(bool val);
     bool IsActive() const;
+
+    void SetNodeName(const std::string& newName);
+    void AddNodeName(const std::string& appendName);
+    const std::string& GetNodeName() const;
 
     Transform& GetLocalTransform();
     const Transform& GetLocalTransform() const;

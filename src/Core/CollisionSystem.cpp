@@ -17,7 +17,7 @@ void CollisionSystem::Update(PlayerController& playerController, Scene& scene)
     {
         if (DetectCollision(playerController, *gameObject))
         {
-            std::cout << "COLLISION with " << gameObject->GetGameObjectID() << ": " << gameObject->GetObjectName() << "\n";
+            std::cout << "COLLISION with " << gameObject->GetNodeName() << std::endl;
             HandleCollision(playerController, *gameObject);
         }
     }

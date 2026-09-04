@@ -1,9 +1,16 @@
 #include "Scene/RenderObject.h"
 
+unsigned int RenderObject::pickingIDCounter = 0;
+
 RenderObject::RenderObject(Model& modelRef)
     : SceneNode(), model(modelRef)
 {
+    pickingID = ++pickingIDCounter;
+}
 
+unsigned int RenderObject::GetPickingID() const
+{
+    return pickingID;
 }
 
 Model& RenderObject::GetModel() const

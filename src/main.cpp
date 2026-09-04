@@ -20,6 +20,7 @@ void InitializeOpenGLParameters();
 void InitializeScene(Scene& scene);
 
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+void MouseButtonCallback(GLFWwindow *window, int button, int action, int mods);
 void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
 void ProcessInput(GLFWwindow* window, float deltaTime);
 
@@ -81,11 +82,13 @@ int main()
 
     // Set callbacks
     glfwSetKeyCallback(window, KeyCallback);
+    glfwSetMouseButtonCallback(window, MouseButtonCallback);
     glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
 
     // =============== INITIALIZE MAIN GAME ===============
     Game game{window};
     globalGame = &game;
+    game.SetInputMode(InputMode::Game);
 
     InitializeOpenGLParameters();
     InitializeScene(game.GetCurrScene());
@@ -109,6 +112,7 @@ int main()
         // Handle input
         game.GetPlayerController().Update(deltaTime);
         game.GetCameraController().Update(deltaTime);
+        game.GetEditorController().Update(deltaTime);
         game.GetInputManager().EndFrame();
 
         // Check object collisions with player
@@ -139,7 +143,7 @@ void InitializeScene(Scene& scene)
 {
     // ==== OBJECT 0 - GROUND ====
     GameObject& ground = scene.AddGameObject(planeObjFilename, rockTextureFilename);
-    ground.SetObjectName("ground");
+    ground.AddNodeName("ground");
     ground.GetLocalTransform().scaleVector = glm::vec3{2.0f};
     ground.GetLocalTransform().positionVector = glm::vec3{0.0f, 0.0f, 0.0f};
     // ground.UseTexture(false);
@@ -162,7 +166,7 @@ void InitializeScene(Scene& scene)
      */
     auto AddWall = [&](glm::vec3 scaleVector, glm::vec3 positionVector) {
         GameObject& wall = scene.AddGameObject(cubeObjFilename, wallTextureFilename);
-        wall.SetObjectName("wall");
+        wall.AddNodeName("wall");
         wall.GetLocalTransform().scaleVector = scaleVector;
         wall.GetLocalTransform().positionVector = positionVector;
         wall.SetCollider(Collider{ColliderShape::Box, 0.0f, glm::vec3{1.0f}, glm::vec3{0.0f}});
@@ -174,6 +178,7 @@ void InitializeScene(Scene& scene)
     
     // ==== OBJECT 2 - CAT ========
     RenderObject& cat = scene.AddRenderObject(catObjFilename);
+    cat.AddNodeName("cat");
     cat.GetLocalTransform().scaleVector = glm::vec3{10.0f};
     cat.GetLocalTransform().SetRotationEuler(glm::vec3{0.0f, 30.f, 0.0f});
     cat.GetLocalTransform().positionVector = glm::vec3{7.0f, 0.5f, -8.f};
@@ -232,10 +237,24 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
         }
         else
         {
-            if (glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_NORMAL)
-                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-            else
+            if (globalGame->GetInputMode() == InputMode::Game)
+            {
                 glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+                globalGame->SetInputMode(InputMode::Editor);
+                globalGame->GetPlayerController().SetActive(false);
+                globalGame->GetCameraController().SetActive(false);
+                globalGame->GetEditorController().SetActive(true);
+            }
+            else 
+            {
+                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+                globalGame->SetInputMode(InputMode::Game);
+                globalGame->GetPlayerController().SetActive(true);
+                globalGame->GetCameraController().SetActive(false);
+                globalGame->GetEditorController().SetActive(false);
+                globalGame->GetEditorController().SetSelectedNode(nullptr);
+                globalGame->GetRenderer().SetCamera(globalGame->GetPlayerController().GetPlayerCamera());
+            }                
         }
         break;
     case GLFW_KEY_H: // help - print help
@@ -263,6 +282,54 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
         break;
     }
 }
+
+void MouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
+{
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+    {
+        // For picking
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        // Render scene with picking renderer (not visible to user)
+        globalGame->GetRenderer().GetPickingRenderer().RenderScene(globalGame->GetCurrScene(), 
+            globalGame->GetRenderer().GetProjection(), globalGame->GetRenderer().GetCamera());
+        glFlush();
+
+        // Get mouse position (relative to framebuffer and window sizes)
+        double xpos, ypos;
+        glfwGetCursorPos(window, &xpos, &ypos);
+        int fbWidth, fbHeight;
+        glfwGetFramebufferSize(window, &fbWidth, &fbHeight);
+        int windowWidth, windowHeight;
+        glfwGetWindowSize(window, &windowWidth, &windowHeight);
+        
+        xpos *= (fbWidth/windowWidth);
+        ypos *= (fbHeight/windowHeight);
+        ypos = fbHeight - ypos; // y in windows starts from top to bottom
+                
+        // Get pixel color at mouse position
+        unsigned char pixel[4];
+        glReadPixels(xpos, ypos, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
+        pixel[3] = 1.0f;
+
+        // If not clicked on any object, return
+        if (pixel[0] == 0.0f && pixel[1] == 0.0f && pixel[2] == 0.0f && pixel[3] == 0.0f)
+        {
+            globalGame->GetEditorController().SetSelectedNode(nullptr);
+            return;
+        }
+
+        // Get selected redner object from unique picking color to object ID
+        unsigned int pickingID = globalGame->GetRenderer().GetPickingRenderer().ColorToID(pixel);
+        RenderObject* renderObject = globalGame->GetCurrScene().GetPickingRenderObjectMap()[pickingID];
+        globalGame->GetEditorController().SetSelectedNode(renderObject);
+        if (renderObject != nullptr)
+        {
+            std::cout << "Selected node: " << globalGame->GetEditorController().GetSelectedNode()->GetNodeName() << std::endl;
+        }
+    }
+}
+
 
 void FramebufferSizeCallback(GLFWwindow* window, int width, int height)
 {

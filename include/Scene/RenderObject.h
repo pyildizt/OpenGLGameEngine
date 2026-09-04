@@ -7,12 +7,18 @@
 class RenderObject : public SceneNode
 {
 private:
+    unsigned int pickingID;
+
     Model& model;
     glm::vec4 color{1.0f};
     bool useTexture{true};
 
 public:
+    static unsigned int pickingIDCounter;
+
     RenderObject(Model& modelRef);
+
+    unsigned int GetPickingID() const;
 
     Model& GetModel() const;
 

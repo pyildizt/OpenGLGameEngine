@@ -1,4 +1,5 @@
 #include "Rendering/Renderer.h"
+#include "Rendering/PickingRenderer.h"
 
 Renderer::Renderer()
     : projection(), sceneRenderer(), colliderRenderer()
@@ -55,6 +56,16 @@ SceneRenderer& Renderer::GetSceneRenderer()
 const SceneRenderer& Renderer::GetSceneRenderer() const
 {
     return sceneRenderer;
+}
+
+PickingRenderer& Renderer::GetPickingRenderer()
+{
+    return pickingRenderer;
+}
+
+const PickingRenderer& Renderer::GetPickingRenderer() const
+{
+    return pickingRenderer;
 }
 
 ColliderRenderer& Renderer::GetColliderRenderer()
