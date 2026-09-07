@@ -1,12 +1,82 @@
-# OpenGLIntroProject
+# C++ OpenGL Game Engine & FPS
 
+A personal C++/OpenGL project focused on building a small game engine and FPS game from scratch.
+
+## About
+
+This is an ongoing personal project written in C++ and OpenGL.
+
+The goal is to learn about game-engine architecture, gameplay systems, rendering, and C++ project organization by implementing the systems myself and only using external libraries if necessary.
+
+The engine currently includes a hierarchical scene system, resource management, rendering, collision detection, player and camera control systems, and early editor functionality.
+
+## Features
+
+#### Rendering
+- OpenGL rendering pipeline
+- GLSL shaders
+- OBJ model loading
+- Texture loading
+- Perspective projection
+- External scene cameras
+
+#### Scene System
+- Hierarchical scene nodes
+- Parent-child transforms
+- Quaternion-based rotations
+- Render objects and game objects
+- Resource management
+
+#### Gameplay
+- Player controller
+- AABB collision detection
+- Camera-based movement
+
+#### Editor
+- Mouse-based object selection using color-based picking
+- Runtime object manipulation
+- Grid and collider visualization
+- Editor camera controller
+
+## Building
+
+### macOS
+#### Requirements
+- CMake 3.20 or newer
+- C++17-compatible compiler
+- Homebrew
+- GLFW and GLM (install with `brew install cmake glfw glm`)
+
+GLAD is included in the repository under external/glad
+
+#### Build
+- Configure project: `cmake -S . -B build`
+- Build the project: `cmake --build build --config Release`
+- Run the executable: `./build/OpenGLGameEngine`
+
+### Windows
+#### Requirements
+- Visual Studio with the C++ development tools
+- CMake 3.20 or newer
+- vcpkg
+- GLFW and GLM (install with `vcpkg install glfw3 glm`)
+
+GLAD is included in the repository under external/glad
+
+#### Build
+- Configure project: `cmake --preset windows`
+- Build the project: `cmake --build build/windows --config Release`
+- Run the executable: `.\build\windows\Release\OpenGLGameEngine.exe`
 
 ## Credits
 ### Libraries
-- stb_image - v2.30 - public domain image loader [https://github.com/nothings/stb/blob/master/stb_image.h]
-- tinyobjloader - v2.0.0 - Tiny but powerful Wavefront .obj/.mtl loader [https://github.com/tinyobjloader/tinyobjloader/blob/release/tiny_obj_loader.h] 
+- [GLFW](https://github.com/glfw/glfw) - Open Source, multi-platform library for OpenGL, OpenGL ES and Vulkan application development
+- [GLAD](https://github.com/Dav1dde/glad) - Vulkan/GL/GLES/EGL/GLX/WGL Loader-Generator 
+- [GLM](https://github.com/g-truc/glm) - A header only C++ mathematics library for graphics software
+- [tinyobjloader](https://github.com/tinyobjloader/tinyobjloader) v2.0.0 - Tiny but powerful Wavefront .obj/.mtl loader
+- [stb_image](https://github.com/nothings/stb) v2.30 - Public domain image loader
+
 ### Assets
-- "cat" Model from Poly Haven [https://polyhaven.com/a/concrete_cat_statue]
-- "rock.jpg" Texture Designed by Magnific [https://www.magnific.com/free-photo/cut-tile-shade-durable-wallpaper_1066914.htm#fromView=keyword&page=1&position=2&uuid=3bfe4f18-b2e3-43c7-bdb4-661acbb413e2&track=ais_hybrid&query=Rocky+ground+texture]
-- "marble.jpg" Texture Designed by Magnific [https://www.magnific.com/free-photo/pale-gray-marble-texture-template_1037231.htm#fromView=keyword&page=1&position=0&uuid=f763cd2a-2f93-489d-846c-a5500d657d61&track=ais_hybrid&query=Marble+texture]
-- "wall.jpg" Texture from Learn OpenGL by Joey de Vries (https://twitter.com/JoeyDeVriez) [https://learnopengl.com/img/textures/wall.jpg]
+Models and textures used in the project are stored in the assets/ directory. 
+Asset sources and licenses can be found in the [Assets.md](Assets.md) file. 
+

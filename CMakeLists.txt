@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(OpenGLIntroProject VERSION 0.1.0 LANGUAGES C CXX)
+project(OpenGLGameEngine VERSION 0.1.0 LANGUAGES C CXX)
 
 # ============================================
 # C++ Standard
@@ -14,13 +14,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Locate GLAD
 # ============================================
 
-if(WIN32)
-    set(GLAD_ROOT "$ENV{USERPROFILE}/OpenGL")
-elseif(APPLE)
-    set(GLAD_ROOT "$ENV{HOME}/OpenGL")
-else()
-    message(FATAL_ERROR "Unsupported platform")
-endif()
+set(GLAD_ROOT "${CMAKE_SOURCE_DIR}/external/glad")
 
 if(NOT EXISTS "${GLAD_ROOT}/include/glad/glad.h")
     message(FATAL_ERROR "GLAD not found! Expected it at: ${GLAD_ROOT}")
@@ -42,7 +36,7 @@ file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS
     src/*.cpp
 )
 
-add_executable(OpenGLIntroProject
+add_executable(${PROJECT_NAME}
     ${SRC_FILES}
     ${GLAD_ROOT}/src/glad.c
 )
@@ -51,7 +45,7 @@ add_executable(OpenGLIntroProject
 # Include directories
 # ============================================
 
-target_include_directories(OpenGLIntroProject PRIVATE
+target_include_directories(${PROJECT_NAME} PRIVATE
     include
     external/stb
     external/tinyobjloader
@@ -62,7 +56,7 @@ target_include_directories(OpenGLIntroProject PRIVATE
 # Link libraries
 # ============================================
 
-target_link_libraries(OpenGLIntroProject PRIVATE
+target_link_libraries(${PROJECT_NAME} PRIVATE
     OpenGL::GL
     glfw
     glm::glm
@@ -75,20 +69,20 @@ target_link_libraries(OpenGLIntroProject PRIVATE
 add_custom_target(CopyShaders ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_SOURCE_DIR}/shaders
-        $<TARGET_FILE_DIR:OpenGLIntroProject>/shaders
+        $<TARGET_FILE_DIR:${PROJECT_NAME}>/shaders
 )
-add_dependencies(OpenGLIntroProject CopyShaders)
+add_dependencies(${PROJECT_NAME} CopyShaders)
 
 # ============================================
 # Compiler warnings
 # ============================================
 
 if(MSVC)
-    target_compile_options(OpenGLIntroProject PRIVATE
+    target_compile_options(${PROJECT_NAME} PRIVATE
         /W4
     )
 else()
-    target_compile_options(OpenGLIntroProject PRIVATE
+    target_compile_options(${PROJECT_NAME} PRIVATE
         -Wall
         -Wextra
         -pedantic
@@ -99,8 +93,8 @@ endif()
 # Copy assets folder into the build directory
 # ============================================
 
-add_custom_command(TARGET OpenGLIntroProject POST_BUILD
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_SOURCE_DIR}/assets
-        $<TARGET_FILE_DIR:OpenGLIntroProject>/assets
+        $<TARGET_FILE_DIR:${PROJECT_NAME}>/assets
 )

@@ -1,0 +1,12 @@
+{
+    "version": 3,
+    "configurePresets": [
+        {
+            "name": "windows",
+            "displayName": "Windows",
+            "generator": "Visual Studio 18 2026",
+            "binaryDir": "${sourceDir}/build/windows",
+            "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+        }
+    ]
+}
