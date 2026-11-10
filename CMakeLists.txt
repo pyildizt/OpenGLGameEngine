@@ -6,7 +6,7 @@ project(OpenGLGameEngine VERSION 0.1.0 LANGUAGES C CXX)
 # C++ Standard
 # ============================================
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -33,7 +33,7 @@ find_package(glm REQUIRED)
 # ============================================
 
 file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS
-    src/*.cpp
+    ${CMAKE_SOURCE_DIR}/src/*.cpp
 )
 
 add_executable(${PROJECT_NAME}
@@ -46,9 +46,9 @@ add_executable(${PROJECT_NAME}
 # ============================================
 
 target_include_directories(${PROJECT_NAME} PRIVATE
-    include
-    external/stb
-    external/tinyobjloader
+    ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/external/stb
+    ${CMAKE_SOURCE_DIR}/external/tinyobjloader
     ${GLAD_ROOT}/include
 )
 

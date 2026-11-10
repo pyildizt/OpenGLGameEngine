@@ -43,16 +43,16 @@ The engine currently includes a hierarchical scene system, resource management, 
 ### macOS
 #### Requirements
 - CMake 3.20 or newer
-- C++17-compatible compiler
+- C++20-compatible compiler
 - Homebrew
 - GLFW and GLM (install with `brew install cmake glfw glm`)
 
 GLAD is included in the repository under external/glad
 
 #### Build
-- Configure project: `cmake -S . -B build`
-- Build the project: `cmake --build build --config Release`
-- Run the executable: `./build/OpenGLGameEngine`
+- Configure project: `cmake --preset macos`
+- Build the project: `cmake --build build/macos --config Release`
+- Run the executable: `./build/macos/Release/OpenGLGameEngine`
 
 ### Windows
 #### Requirements

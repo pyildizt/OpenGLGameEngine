@@ -7,6 +7,12 @@
             "generator": "Visual Studio 18 2026",
             "binaryDir": "${sourceDir}/build/windows",
             "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+        },
+        {
+            "name": "macos",
+            "displayName": "macOS",
+            "generator": "Unix Makefiles",
+            "binaryDir": "${sourceDir}/build/macos"
         }
     ]
 }
