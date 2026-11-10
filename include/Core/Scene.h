@@ -3,6 +3,7 @@
 
 #include "Camera/Camera.h"
 #include "Core/ResourceManager.h"
+#include "Interfaces/ICollidable.h"
 #include "Scene/GameObject.h"
 #include "Scene/RenderObject.h"
 #include "Scene/SceneNode.h"
@@ -17,7 +18,14 @@ private:
 
     std::vector<std::unique_ptr<SceneNode>> sceneNodes;
 
+    std::vector<Camera*> cameras; 
+
+    std::vector<ICollidable*> collidables;
+
     std::unordered_map<unsigned int, RenderObject*> pickingRenderObjectMap;
+
+    void RegisterNode(SceneNode& nodeRef);
+    void UnregisterNode(SceneNode& nodeRef);
 
 public:
     Scene(ResourceManager& resourceManagerRef);
@@ -26,12 +34,14 @@ public:
     T& AddNode(Args&&... args)
     {
         auto node = std::make_unique<T>(std::forward<Args>(args)...);
-        T& result = *node;
+        T& nodeRef = *node;
+        RegisterNode(nodeRef);
         sceneNodes.push_back(std::move(node));
-        return result;
+        return nodeRef;
     }
 
     SceneNode& AddSceneNode();
+    void RemoveSceneNode(SceneNode* node);
 
     RenderObject& AddRenderObject(Model& modelRef);
     RenderObject& AddRenderObject(const std::string& modelFilename);
@@ -45,11 +55,9 @@ public:
 
     std::vector<std::unique_ptr<SceneNode>>& GetSceneNodes();
 
-    std::vector<GameObject*> GetGameObjects() const;
-    void GetNodeGameObjects(const SceneNode& node, std::vector<GameObject*>& gameObjects) const;
-
     std::vector<Camera*> GetCameras() const;
-    void GetNodeCameras(const SceneNode& node, std::vector<Camera*>& cameras) const;
+
+    std::vector<ICollidable*> GetCollidables() const;
 
     std::unordered_map<unsigned int, RenderObject*>& GetPickingRenderObjectMap();
 };

@@ -20,6 +20,7 @@ struct Collider
 class ICollidable
 {
 public:
+    virtual ~ICollidable() = default;
     virtual Collider GetWorldCollider() const = 0;
 };
 

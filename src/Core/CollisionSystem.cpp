@@ -2,7 +2,6 @@
 
 #include "Core/PlayerController.h"
 #include "Interfaces/ICollidable.h"
-#include "Scene/GameObject.h"
 
 #include <iostream>
 
@@ -11,14 +10,15 @@ CollisionSystem::CollisionSystem()
 
 }
 
+// FIXME: Right now only detecting collisions with the player! Not with other objects.
 void CollisionSystem::Update(PlayerController& playerController, Scene& scene)
 {
-    for (GameObject* gameObject : scene.GetGameObjects())
+    for (ICollidable* collidable : scene.GetCollidables())
     {
-        if (DetectCollision(playerController, *gameObject))
+        if (DetectCollision(playerController, *collidable))
         {
-            std::cout << "COLLISION with " << gameObject->GetNodeName() << std::endl;
-            HandleCollision(playerController, *gameObject);
+            std::cout << "COLLISION with " << collidable << std::endl;
+            HandleCollision(playerController, *collidable);
         }
     }
 }

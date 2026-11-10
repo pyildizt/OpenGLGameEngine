@@ -9,6 +9,8 @@ class GameObject : public RenderObject, public ICollidable
 private:
     Collider collider;
 
+    glm::vec3 CalculateAABBHalfSize(const glm::mat3& worldTransform, const glm::vec3& localHalfSize) const;
+
 public:
     GameObject(Model& modelRef);
 

@@ -107,12 +107,9 @@ void ColliderRenderer::DrawColliders(Scene& scene, Shader& shader)
 {
     if (showColliders)
     {
-        for (const GameObject* gameObject : scene.GetGameObjects())
+        for (const ICollidable* collidable : scene.GetCollidables())
         {
-            if (gameObject->IsActive())
-            {
-                DrawCollider(*gameObject, shader);
-            }
+            DrawCollider(*collidable, shader);
         }
     }
 }

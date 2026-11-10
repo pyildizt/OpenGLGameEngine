@@ -6,9 +6,56 @@ Scene::Scene(ResourceManager& resourceManagerRef)
 
 }
 
+void Scene::RegisterNode(SceneNode& nodeRef)
+{
+    if (auto* camera = dynamic_cast<Camera*>(&nodeRef))
+    {
+        cameras.push_back(camera);
+    }
+    if (auto* collidable = dynamic_cast<ICollidable*>(&nodeRef))
+    {
+        collidables.push_back(collidable);
+    } 
+
+    for (SceneNode* child : nodeRef.GetChildren())
+    {
+        RegisterNode(*child);
+    }
+}
+
+void Scene::UnregisterNode(SceneNode& nodeRef)
+{
+    if (auto* camera = dynamic_cast<Camera*>(&nodeRef))
+    {
+        std::erase(cameras, camera);
+    }
+    if (auto* collidable = dynamic_cast<ICollidable*>(&nodeRef))
+    {
+        std::erase(collidables, collidable);
+    }
+
+    for (SceneNode* child : nodeRef.GetChildren())
+    {
+        UnregisterNode(*child);
+    }
+}
+
 SceneNode& Scene::AddSceneNode()
 {
     return AddNode<SceneNode>();
+}
+
+void Scene::RemoveSceneNode(SceneNode* node)
+{
+    for (auto it = sceneNodes.begin(); it != sceneNodes.end(); it++)
+    {
+        if (it->get() == node)
+        {
+            UnregisterNode(**it); // *it to get unique_ptr, **it to get the actual object
+            sceneNodes.erase(it);
+            return;
+        }
+    }
 }
 
 RenderObject& Scene::AddRenderObject(Model& modelRef)
@@ -78,17 +125,23 @@ std::vector<std::unique_ptr<SceneNode>>& Scene::GetSceneNodes()
     return sceneNodes;
 }
 
-std::vector<GameObject*> Scene::GetGameObjects() const
+std::vector<ICollidable*> Scene::GetCollidables() const
 {
-    std::vector<GameObject*> gameObjects;
-    for (const auto& node : sceneNodes)
-    {
-        GetNodeGameObjects(*node, gameObjects);
-    }
-    return gameObjects;
+    return collidables;
 }
 
-void Scene::GetNodeGameObjects(const SceneNode& node, std::vector<GameObject*>& gameObjects) const
+std::vector<Camera*> Scene::GetCameras() const
+{
+    return cameras;
+}
+
+std::unordered_map<unsigned int, RenderObject*>& Scene::GetPickingRenderObjectMap()
+{
+    return pickingRenderObjectMap;
+}
+
+/*
+void GetNodeGameObjects(const SceneNode& node, std::vector<GameObject*>& gameObjects)
 {
     if (!node.IsActive())
     {
@@ -106,20 +159,17 @@ void Scene::GetNodeGameObjects(const SceneNode& node, std::vector<GameObject*>& 
     }
 }
 
-std::vector<Camera*> Scene::GetCameras() const
+std::vector<GameObject*> Scene::GetGameObjects() const
 {
-    std::vector<Camera*> cameras;
+    std::vector<GameObject*> gameObjects;
     for (const auto& node : sceneNodes)
     {
-        if (const Camera* camera = dynamic_cast<const Camera*>(node.get()))
-        {
-            GetNodeCameras(*node, cameras);
-        }
+        GetNodeGameObjects(*node, gameObjects);
     }
-    return cameras;
+    return gameObjects;
 }
 
-void Scene::GetNodeCameras(const SceneNode& node, std::vector<Camera*>& cameras) const
+void GetNodeCameras(const SceneNode& node, std::vector<Camera*>& cameras)
 {
     if (!node.IsActive())
     {
@@ -137,7 +187,16 @@ void Scene::GetNodeCameras(const SceneNode& node, std::vector<Camera*>& cameras)
     }
 }
 
-std::unordered_map<unsigned int, RenderObject*>& Scene::GetPickingRenderObjectMap()
+std::vector<Camera*> Scene::GetCameras() const
 {
-    return pickingRenderObjectMap;
+    std::vector<Camera*> cameras;
+    for (const auto& node : sceneNodes)
+    {
+        if (const Camera* camera = dynamic_cast<const Camera*>(node.get()))
+        {
+            GetNodeCameras(*node, cameras);
+        }
+    }
+    return cameras;
 }
+*/
