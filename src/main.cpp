@@ -7,12 +7,12 @@
 
 #include "Camera/Camera.h"
 #include "Camera/CameraController.h"
-#include "Core/CollisionSystem.h"
 #include "Core/Game.h"
-#include "Core/InputManager.h"
 #include "Core/PlayerController.h"
 #include "Core/Scene.h"
 #include "Rendering/Renderer.h"
+#include "Scene/Door.h"
+#include "Scene/GameObject.h"
 #include "Scene/RenderObject.h"
 #include "Utilities/Utils.h"
 
@@ -95,6 +95,7 @@ int main()
     game.GetCameraController().SetCamera(*game.GetCurrScene().GetCameras().back());
 
     game.GetRenderer().GetColliderRenderer().SetShowColliders(true);
+    game.GetRenderer().GetInteractionRenderer().SetShowInteractionSpheres(true);
     game.GetRenderer().GetGridRenderer().SetShowGrid(true);
     // ====================================================
 
@@ -106,23 +107,9 @@ int main()
         lastFrame = currentFrame;
 
         // =============== MAIN RENDER LOOP ===============
-        Renderer& renderer = game.GetRenderer();
-        Scene& currScene = game.GetCurrScene();
-
-        // Handle input
-        game.GetPlayerController().Update(deltaTime);
-        game.GetCameraController().Update(deltaTime);
-        game.GetEditorController().Update(deltaTime);
-        game.GetInputManager().EndFrame();
-
-        // Check object collisions with player
-        game.GetCollisionSystem().Update(game.GetPlayerController(), currScene);
-
-        // Render scene
-        renderer.RenderScene(currScene);
-
-        // Render player collider
-        renderer.GetColliderRenderer().DrawCollider(game.GetPlayerController(), renderer.GetShader());
+        game.Update(deltaTime);
+        
+        game.Render();
         // ================================================
 
         // Check and call events and swap the buffers
@@ -184,18 +171,22 @@ void InitializeScene(Scene& scene)
     cat.GetLocalTransform().positionVector = glm::vec3{7.0f, 0.5f, -8.f};
     cat.SetColor(RGBAtoVec4(188, 143, 196, 200));
 
+    /*
     // === RENDER OBJECT 0 - SPHERES ===
     RenderObject& sphere1 = scene.AddRenderObject(sphereObjFilename);
+    sphere1.AddNodeName("sphere red");
     sphere1.GetLocalTransform().scaleVector = glm::vec3{0.5f};
     sphere1.SetColor(RGBAtoVec4(180, 0, 0, 255));
     sphere1.GetLocalTransform().positionVector = glm::vec3{0.0f, 1.0f, 0.0f};
 
     RenderObject& sphere2 = scene.AddRenderObject(sphereObjFilename);
+    sphere2.AddNodeName("sphere green");
     sphere2.GetLocalTransform().scaleVector = glm::vec3{0.5f};
     sphere2.SetColor(RGBAtoVec4(0, 180, 0, 255));
     sphere2.GetLocalTransform().positionVector = glm::vec3{3.0f, 1.0f, 0.0f};
 
     RenderObject& sphere3 = scene.AddRenderObject(sphereObjFilename);
+    sphere3.AddNodeName("sphere blue");
     sphere3.GetLocalTransform().scaleVector = glm::vec3{1.0f};
     sphere3.SetColor(RGBAtoVec4(0, 0, 180, 255));
     sphere3.GetLocalTransform().positionVector = glm::vec3{3.0f, 1.0f, 0.0f};
@@ -205,10 +196,19 @@ void InitializeScene(Scene& scene)
     //CameraFixedObject& sphere = scene.AddCameraFixedObject(sphereObjFilename, redTextureFilename);
     //sphere.GetTransform().scaleVector = glm::vec3{0.5f};
 
+    */
     // ===== CAMERA 0 =============
     Camera& camera = scene.AddCamera();
     camera.GetLocalTransform().positionVector = glm::vec3{2.0f, 2.0f, 1.0f};
     camera.GetLocalTransform().SetRotationEuler(glm::vec3{0.0f, 0.0f, 0.0f});
+
+    // ======= DOOR 0 =============
+    Door& door = scene.AddDoor(cubeObjFilename, sphereObjFilename);
+    door.AddNodeName("door");
+    door.GetLocalTransform().Translate(glm::vec3(0.0f, 1.3f, -7.0f));
+    AddWall(glm::vec3{0.5f, 2.5f, 3.0f}, glm::vec3{0.0f, 1.25f, -12.0f});
+    AddWall(glm::vec3{0.5f, 2.5f, 3.0f}, glm::vec3{0.0f, 1.25f, -4.0f});
+    
 }
 
 /// <summary>
@@ -258,7 +258,8 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
         }
         break;
     case GLFW_KEY_H: // help - print help
-        std::cout << "=======================\nAlt+Esc: Quit\nEsc: Change cursor mode\nJ: Player camera\nK: Scene camera\nC: Show colliders\n=======================" << std::endl;
+        std::cout << "=======================\nAlt+Esc: Quit\nE: INTERACT\nEsc: Change cursor mode\nJ: Player camera\nK: Scene camera\nC: Show colliders\nI: Show interactables\nG: Show grid\n-----------------------" << std::endl;
+        std::cout << "After select with cursor\nP: Print transform\n1: Translate WASDQE\n2: Scale WASDQE\n2: Scale uniform RT\n2: Reset scale Y\n3: Rotate WASDQE\n=======================" << std::endl; 
         break;
     case GLFW_KEY_K: // change camera to scene camera
         globalGame->GetPlayerController().SetActive(false);
@@ -273,6 +274,12 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     case GLFW_KEY_C: // toggle show colliders
         globalGame->GetRenderer().GetColliderRenderer().SetShowColliders(
             !globalGame->GetRenderer().GetColliderRenderer().ShowColliders()
+        );
+        break;
+    case GLFW_KEY_I: // toggle show interactables
+        std::cout << "toggle interactable" << std::endl;
+        globalGame->GetRenderer().GetInteractionRenderer().SetShowInteractionSpheres(
+            !globalGame->GetRenderer().GetInteractionRenderer().ShowInteractionSpheres()
         );
         break;
     case GLFW_KEY_G: // toggle show grid

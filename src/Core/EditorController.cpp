@@ -2,6 +2,11 @@
 
 #include "Scene/SceneNode.h"
 
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/io.hpp>
+
+#include <iostream>
+
 EditorController::EditorController(InputManager& inputManager)
     : inputManager(inputManager)
 {
@@ -48,6 +53,14 @@ void EditorController::Update(float deltaTime)
     if (selectedNode == nullptr)
     {
         return;
+    }
+
+    if (inputManager.IsKeyPressed(GLFW_KEY_P))
+    {
+        std::cout << glm::io::precision(2) 
+            <<   "pos:" << selectedNode->GetLocalTransform().positionVector
+            << "\nrot:" << selectedNode->GetLocalTransform().GetRotationEuler()
+            << "\nscl:" << selectedNode->GetLocalTransform().scaleVector << std::endl;
     }
 
     if (inputManager.IsKeyPressed(GLFW_KEY_1))

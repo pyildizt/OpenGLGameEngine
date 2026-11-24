@@ -4,6 +4,8 @@
 #include "Camera/Camera.h"
 #include "Core/ResourceManager.h"
 #include "Interfaces/ICollidable.h"
+#include "Interfaces/IInteractable.h"
+#include "Scene/Door.h"
 #include "Scene/GameObject.h"
 #include "Scene/RenderObject.h"
 #include "Scene/SceneNode.h"
@@ -21,6 +23,8 @@ private:
     std::vector<Camera*> cameras; 
 
     std::vector<ICollidable*> collidables;
+    std::vector<IAnimatable*> animatables;
+    std::vector<IInteractable*> interactables;
 
     std::unordered_map<unsigned int, RenderObject*> pickingRenderObjectMap;
 
@@ -51,6 +55,9 @@ public:
     GameObject& AddGameObject(const std::string& modelFilename);
     GameObject& AddGameObject(const std::string& modelFilename, const std::string& textureFilename);
 
+    Door& AddDoor(Model& modelRef, Model& hingeModelRef);
+    Door& AddDoor(const std::string& modelFilename, const std::string& hingeModelFilename);
+
     Camera& AddCamera();
 
     std::vector<std::unique_ptr<SceneNode>>& GetSceneNodes();
@@ -58,6 +65,8 @@ public:
     std::vector<Camera*> GetCameras() const;
 
     std::vector<ICollidable*> GetCollidables() const;
+    std::vector<IAnimatable*> GetAnimatables() const;
+    std::vector<IInteractable*> GetInteractables() const;
 
     std::unordered_map<unsigned int, RenderObject*>& GetPickingRenderObjectMap();
 };

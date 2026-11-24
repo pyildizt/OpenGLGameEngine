@@ -2,9 +2,11 @@
 #define GAME_H
 
 #include "Camera/CameraController.h"
+#include "Core/AnimationSystem.h"
 #include "Core/CollisionSystem.h"
 #include "Core/EditorController.h"
 #include "Core/InputManager.h"
+#include "Core/InteractionSystem.h"
 #include "Core/PlayerController.h"
 #include "Core/ResourceManager.h"
 #include "Core/Scene.h"
@@ -27,6 +29,8 @@ private:
     CameraController cameraController;
     EditorController editorController;
     CollisionSystem collisionSystem;
+    AnimationSystem animationSystem;
+    InteractionSystem interactionSystem;
 
     ResourceManager resourceManager;
     std::vector<Scene> scenes;
@@ -39,11 +43,16 @@ private:
 public:
     Game(GLFWwindow* window);
 
+    void Update(float deltaTime);
+    void Render();
+
     InputManager& GetInputManager();
     PlayerController& GetPlayerController();
     CameraController& GetCameraController();
     EditorController& GetEditorController();
     CollisionSystem& GetCollisionSystem();
+    AnimationSystem& GetAnimationSystem();
+    InteractionSystem& GetInteractionSystem();
 
     ResourceManager& GetResourceManager();
 

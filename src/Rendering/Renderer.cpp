@@ -1,8 +1,9 @@
 #include "Rendering/Renderer.h"
+#include "Rendering/InteractionRenderer.h"
 #include "Rendering/PickingRenderer.h"
 
 Renderer::Renderer()
-    : projection(), sceneRenderer(), colliderRenderer()
+    : projection(), sceneRenderer(), colliderRenderer(), interactionRenderer()
 {
 
 }
@@ -78,6 +79,16 @@ const ColliderRenderer& Renderer::GetColliderRenderer() const
     return colliderRenderer;
 }
 
+InteractionRenderer& Renderer::GetInteractionRenderer()
+{
+    return interactionRenderer;
+}
+
+const InteractionRenderer& Renderer::GetInteractionRenderer() const
+{
+    return interactionRenderer;
+}
+
 GridRenderer& Renderer::GetGridRenderer()
 {
     return gridRenderer;
@@ -95,5 +106,6 @@ void Renderer::RenderScene(Scene& scene)
 
     sceneRenderer.RenderScene(scene, *shader, projection, *camera);
     colliderRenderer.DrawColliders(scene, *shader);
+    interactionRenderer.DrawInteractionSpheres(scene, *shader);
     gridRenderer.DrawGrid(*shader);
 }

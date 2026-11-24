@@ -16,6 +16,14 @@ void Scene::RegisterNode(SceneNode& nodeRef)
     {
         collidables.push_back(collidable);
     } 
+    if (auto* animatable = dynamic_cast<IAnimatable*>(&nodeRef))
+    {
+        animatables.push_back(animatable);
+    }
+    if (auto* interactable = dynamic_cast<IInteractable*>(&nodeRef))
+    {
+        interactables.push_back(interactable);
+    }
 
     for (SceneNode* child : nodeRef.GetChildren())
     {
@@ -32,6 +40,14 @@ void Scene::UnregisterNode(SceneNode& nodeRef)
     if (auto* collidable = dynamic_cast<ICollidable*>(&nodeRef))
     {
         std::erase(collidables, collidable);
+    }
+    if (auto* animatable = dynamic_cast<IAnimatable*>(&nodeRef))
+    {
+        std::erase(animatables, animatable);
+    }
+    if (auto* interactable = dynamic_cast<IInteractable*>(&nodeRef))
+    {
+        std::erase(interactables, interactable);
     }
 
     for (SceneNode* child : nodeRef.GetChildren())
@@ -113,6 +129,26 @@ GameObject& Scene::AddGameObject(const std::string& modelFilename, const std::st
     return AddGameObject(modelRef);
 }
 
+Door& Scene::AddDoor(Model& modelRef, Model& hingeModelRef)
+{
+    Door& door = AddNode<Door>(modelRef, hingeModelRef);
+    door.SetNodeName("door " + std::to_string(door.GetSceneNodeID()));
+    if (!modelRef.HasTexture())
+    {
+        door.GetDoorObject().UseTexture(false);
+    }
+    pickingRenderObjectMap[door.GetDoorHinge().GetPickingID()] = &door.GetDoorHinge();
+    pickingRenderObjectMap[door.GetDoorObject().GetPickingID()] = &door.GetDoorObject();
+    return door;
+}
+
+Door& Scene::AddDoor(const std::string& modelFilename, const std::string& hingeModelFilename)
+{
+    Model& modelRef = resourceManager.GetOrLoadModel(modelFilename);
+    Model& hingeModelRef = resourceManager.GetOrLoadModel(hingeModelFilename);
+    return AddDoor(modelRef, hingeModelRef);
+}
+
 Camera& Scene::AddCamera()
 {
     Camera& camera = AddNode<Camera>();
@@ -135,68 +171,17 @@ std::vector<Camera*> Scene::GetCameras() const
     return cameras;
 }
 
+std::vector<IAnimatable*> Scene::GetAnimatables() const
+{
+    return animatables;
+}
+
+std::vector<IInteractable*> Scene::GetInteractables() const
+{
+    return interactables;
+}
+
 std::unordered_map<unsigned int, RenderObject*>& Scene::GetPickingRenderObjectMap()
 {
     return pickingRenderObjectMap;
 }
-
-/*
-void GetNodeGameObjects(const SceneNode& node, std::vector<GameObject*>& gameObjects)
-{
-    if (!node.IsActive())
-    {
-        return;
-    }
-
-    if (const GameObject* gameObject = dynamic_cast<const GameObject*>(&node))
-    {
-        gameObjects.push_back(const_cast<GameObject*>(gameObject));
-    }
-
-    for (const SceneNode* child : node.GetChildren())
-    {
-        GetNodeGameObjects(*child, gameObjects);
-    }
-}
-
-std::vector<GameObject*> Scene::GetGameObjects() const
-{
-    std::vector<GameObject*> gameObjects;
-    for (const auto& node : sceneNodes)
-    {
-        GetNodeGameObjects(*node, gameObjects);
-    }
-    return gameObjects;
-}
-
-void GetNodeCameras(const SceneNode& node, std::vector<Camera*>& cameras)
-{
-    if (!node.IsActive())
-    {
-        return;
-    }
-
-    if (const Camera* camera = dynamic_cast<const Camera*>(&node))
-    {
-        cameras.push_back(const_cast<Camera*>(camera));
-    }
-
-    for (const SceneNode* child : node.GetChildren())
-    {
-        GetNodeCameras(*child, cameras);
-    }
-}
-
-std::vector<Camera*> Scene::GetCameras() const
-{
-    std::vector<Camera*> cameras;
-    for (const auto& node : sceneNodes)
-    {
-        if (const Camera* camera = dynamic_cast<const Camera*>(node.get()))
-        {
-            GetNodeCameras(*node, cameras);
-        }
-    }
-    return cameras;
-}
-*/

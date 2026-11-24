@@ -1,16 +1,19 @@
 #include "Core/Game.h"
 
 #include "Camera/CameraController.h"
+#include "Core/AnimationSystem.h"
 #include "Core/CollisionSystem.h"
 #include "Core/EditorController.h"
 #include "Core/InputManager.h"
+#include "Core/InteractionSystem.h"
 #include "Core/PlayerController.h"
 #include "Core/ResourceManager.h"
 #include "Rendering/Renderer.h"
 
 Game::Game(GLFWwindow* window)
     : inputManager(window), 
-      playerController(inputManager), cameraController(inputManager), editorController(inputManager), collisionSystem(),
+      playerController(inputManager), cameraController(inputManager), editorController(inputManager), 
+      collisionSystem(), animationSystem(), interactionSystem(),
       resourceManager(),
       renderer()
 {
@@ -33,6 +36,34 @@ Game::Game(GLFWwindow* window)
         "shaders/fragment_picking.glsl"
     );
     renderer.GetPickingRenderer().SetShader(pickingShader);
+}
+
+void Game::Update(float deltaTime)
+{
+    // Handle input
+    playerController.Update(deltaTime);
+    cameraController.Update(deltaTime);
+    editorController.Update(deltaTime);
+
+    // Handle animations
+    animationSystem.Update(GetCurrScene(), deltaTime);
+
+    // Check object collisions with player
+    collisionSystem.Update(playerController, GetCurrScene());
+
+    // Check player interactions
+    interactionSystem.Update(playerController, GetCurrScene(), inputManager);
+
+    inputManager.EndFrame();
+}
+
+void Game::Render()
+{
+    // Render scene
+    renderer.RenderScene(GetCurrScene());
+
+    // Render player collider
+    renderer.GetColliderRenderer().DrawCollider(playerController, renderer.GetShader());
 }
 
 InputManager& Game::GetInputManager()
@@ -58,6 +89,16 @@ EditorController& Game::GetEditorController()
 CollisionSystem& Game::GetCollisionSystem()
 {
     return collisionSystem;
+}
+
+AnimationSystem& Game::GetAnimationSystem()
+{
+    return animationSystem;
+}
+
+InteractionSystem& Game::GetInteractionSystem()
+{
+    return interactionSystem;
 }
 
 ResourceManager& Game::GetResourceManager()

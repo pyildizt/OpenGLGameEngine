@@ -6,6 +6,7 @@
 #include "Core/Scene.h"
 #include "Rendering/ColliderRenderer.h"
 #include "Rendering/GridRenderer.h"
+#include "Rendering/InteractionRenderer.h"
 #include "Rendering/PickingRenderer.h"
 #include "Rendering/SceneRenderer.h"
 #include "Rendering/Shader.h"
@@ -20,6 +21,7 @@ private:
     SceneRenderer sceneRenderer;
     PickingRenderer pickingRenderer;
     ColliderRenderer colliderRenderer;
+    InteractionRenderer interactionRenderer;
     GridRenderer gridRenderer;
 
 public:
@@ -44,6 +46,9 @@ public:
     
     ColliderRenderer& GetColliderRenderer();
     const ColliderRenderer& GetColliderRenderer() const;
+
+    InteractionRenderer& GetInteractionRenderer();
+    const InteractionRenderer& GetInteractionRenderer() const;
 
     GridRenderer& GetGridRenderer();
     const GridRenderer& GetGridRenderer() const;
